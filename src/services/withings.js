@@ -1,0 +1,369 @@
+import axios from 'axios';
+import { loadSettings, saveSettings } from '../components/Settings';
+
+// Withings API endpoints
+const WITHINGS_AUTH_URL = 'https://account.withings.com/oauth2_user/authorize2';
+const WITHINGS_TOKEN_URL = 'https://wbsapi.withings.net/v2/oauth2';
+const WITHINGS_MEASURE_URL = 'https://wbsapi.withings.net/measure';
+
+const REDIRECT_URI = 'http://localhost:5173/withings/callback';
+
+// Measurement types from Withings API
+const MEAS_TYPES = {
+    WEIGHT: 1,          // kg
+    FAT_FREE_MASS: 5,   // kg
+    FAT_RATIO: 6,       // %
+    FAT_MASS: 8,        // kg
+    MUSCLE_MASS: 76,    // kg
+    HYDRATION: 77,      // kg
+    BONE_MASS: 88       // kg
+};
+
+/**
+ * Get Withings credentials from settings
+ */
+const getWithingsCredentials = () => {
+    const settings = loadSettings();
+    return {
+        clientId: settings.withingsClientId || '',
+        clientSecret: settings.withingsClientSecret || ''
+    };
+};
+
+/**
+ * Get stored Withings tokens
+ */
+export const getWithingsTokens = () => {
+    const settings = loadSettings();
+    return {
+        accessToken: settings.withingsAccessToken || null,
+        refreshToken: settings.withingsRefreshToken || null,
+        expiresAt: settings.withingsTokenExpiresAt || null,
+        userId: settings.withingsUserId || null
+    };
+};
+
+/**
+ * Store Withings tokens in settings
+ */
+const storeWithingsTokens = (tokenData) => {
+    const settings = loadSettings();
+    const expiresAt = Date.now() + (tokenData.expires_in * 1000);
+
+    saveSettings({
+        ...settings,
+        withingsAccessToken: tokenData.access_token,
+        withingsRefreshToken: tokenData.refresh_token,
+        withingsTokenExpiresAt: expiresAt,
+        withingsUserId: tokenData.userid
+    });
+};
+
+/**
+ * Clear Withings tokens (disconnect)
+ */
+export const disconnectWithings = () => {
+    const settings = loadSettings();
+    saveSettings({
+        ...settings,
+        withingsAccessToken: null,
+        withingsRefreshToken: null,
+        withingsTokenExpiresAt: null,
+        withingsUserId: null
+    });
+};
+
+/**
+ * Check if Withings is connected
+ */
+export const isWithingsConnected = () => {
+    const { accessToken } = getWithingsTokens();
+    return !!accessToken;
+};
+
+/**
+ * Generate authorization URL for Withings OAuth
+ */
+export const getWithingsAuthUrl = () => {
+    const { clientId } = getWithingsCredentials();
+    if (!clientId) {
+        console.error('Withings Client ID not configured');
+        return null;
+    }
+
+    const scope = 'user.metrics';
+    const state = Math.random().toString(36).substring(7); // Simple state for CSRF protection
+
+    // Store state for verification
+    sessionStorage.setItem('withings_oauth_state', state);
+
+    const params = new URLSearchParams({
+        response_type: 'code',
+        client_id: clientId,
+        redirect_uri: REDIRECT_URI,
+        scope: scope,
+        state: state
+    });
+
+    return `${WITHINGS_AUTH_URL}?${params.toString()}`;
+};
+
+/**
+ * Exchange authorization code for tokens
+ */
+export const exchangeWithingsCode = async (code) => {
+    try {
+        const { clientId, clientSecret } = getWithingsCredentials();
+
+        const params = new URLSearchParams({
+            action: 'requesttoken',
+            grant_type: 'authorization_code',
+            client_id: clientId,
+            client_secret: clientSecret,
+            code: code,
+            redirect_uri: REDIRECT_URI
+        });
+
+        const response = await axios.post(WITHINGS_TOKEN_URL, params, {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        });
+
+        if (response.data.status === 0 && response.data.body) {
+            storeWithingsTokens(response.data.body);
+            return response.data.body;
+        } else {
+            throw new Error(`Withings API error: ${response.data.error || 'Unknown error'}`);
+        }
+    } catch (error) {
+        console.error('Error exchanging Withings code:', error);
+        throw error;
+    }
+};
+
+/**
+ * Refresh the access token
+ */
+const refreshWithingsToken = async () => {
+    try {
+        const { clientId, clientSecret } = getWithingsCredentials();
+        const { refreshToken } = getWithingsTokens();
+
+        if (!refreshToken) {
+            throw new Error('No refresh token available');
+        }
+
+        const params = new URLSearchParams({
+            action: 'requesttoken',
+            grant_type: 'refresh_token',
+            client_id: clientId,
+            client_secret: clientSecret,
+            refresh_token: refreshToken
+        });
+
+        const response = await axios.post(WITHINGS_TOKEN_URL, params, {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        });
+
+        if (response.data.status === 0 && response.data.body) {
+            storeWithingsTokens(response.data.body);
+            return response.data.body.access_token;
+        } else {
+            // Token refresh failed, disconnect
+            disconnectWithings();
+            throw new Error('Token refresh failed');
+        }
+    } catch (error) {
+        console.error('Error refreshing Withings token:', error);
+        disconnectWithings();
+        throw error;
+    }
+};
+
+/**
+ * Get valid access token (refresh if needed)
+ */
+const getValidAccessToken = async () => {
+    const { accessToken, expiresAt } = getWithingsTokens();
+
+    if (!accessToken) {
+        throw new Error('Not connected to Withings');
+    }
+
+    // Check if token is expired or will expire in next 5 minutes
+    if (expiresAt && Date.now() > expiresAt - (5 * 60 * 1000)) {
+        return await refreshWithingsToken();
+    }
+
+    return accessToken;
+};
+
+/**
+ * Fetch body measurements from Withings
+ * @param {Date} startDate - Start of date range
+ * @param {Date} endDate - End of date range
+ */
+export const getBodyMeasures = async (startDate, endDate) => {
+    try {
+        const accessToken = await getValidAccessToken();
+
+        const params = new URLSearchParams({
+            action: 'getmeas',
+            meastypes: `${MEAS_TYPES.WEIGHT},${MEAS_TYPES.FAT_RATIO},${MEAS_TYPES.MUSCLE_MASS},${MEAS_TYPES.FAT_MASS}`,
+            category: 1, // Real measurements only
+            startdate: Math.floor(startDate.getTime() / 1000),
+            enddate: Math.floor(endDate.getTime() / 1000)
+        });
+
+        const response = await axios.post(WITHINGS_MEASURE_URL, params, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        });
+
+        if (response.data.status === 0 && response.data.body) {
+            return parseMeasurements(response.data.body.measuregrps);
+        } else {
+            throw new Error(`Withings API error: ${response.data.error || 'Unknown error'}`);
+        }
+    } catch (error) {
+        console.error('Error fetching Withings measures:', error);
+        throw error;
+    }
+};
+
+/**
+ * Get the latest body measurements
+ */
+export const getLatestMeasures = async () => {
+    try {
+        const accessToken = await getValidAccessToken();
+
+        const params = new URLSearchParams({
+            action: 'getmeas',
+            meastypes: `${MEAS_TYPES.WEIGHT},${MEAS_TYPES.FAT_RATIO},${MEAS_TYPES.MUSCLE_MASS}`,
+            category: 1,
+            lastupdate: Math.floor((Date.now() - 90 * 24 * 60 * 60 * 1000) / 1000) // Last 90 days
+        });
+
+        const response = await axios.post(WITHINGS_MEASURE_URL, params, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        });
+
+        if (response.data.status === 0 && response.data.body) {
+            const measures = parseMeasurements(response.data.body.measuregrps);
+            // Return most recent of each type
+            return {
+                weight: measures.find(m => m.weight)?.weight || null,
+                fatRatio: measures.find(m => m.fatRatio)?.fatRatio || null,
+                muscleMass: measures.find(m => m.muscleMass)?.muscleMass || null,
+                date: measures[0]?.date || null
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error('Error fetching latest Withings measures:', error);
+        return null;
+    }
+};
+
+/**
+ * Parse Withings measurement groups into usable format
+ */
+const parseMeasurements = (measureGroups) => {
+    if (!measureGroups) return [];
+
+    return measureGroups.map(group => {
+        const date = new Date(group.date * 1000);
+        const result = { date, timestamp: group.date };
+
+        group.measures.forEach(measure => {
+            // Convert value using unit (value * 10^unit)
+            const value = measure.value * Math.pow(10, measure.unit);
+
+            switch (measure.type) {
+                case MEAS_TYPES.WEIGHT:
+                    result.weight = Math.round(value * 10) / 10; // kg with 1 decimal
+                    break;
+                case MEAS_TYPES.FAT_RATIO:
+                    result.fatRatio = Math.round(value * 10) / 10; // % with 1 decimal
+                    break;
+                case MEAS_TYPES.MUSCLE_MASS:
+                    result.muscleMass = Math.round(value * 10) / 10; // kg with 1 decimal
+                    break;
+                case MEAS_TYPES.FAT_MASS:
+                    result.fatMass = Math.round(value * 10) / 10; // kg with 1 decimal
+                    break;
+            }
+        });
+
+        return result;
+    }).sort((a, b) => b.timestamp - a.timestamp); // Newest first
+};
+
+/**
+ * Get body composition data formatted for charts (last 6 weeks)
+ */
+export const getBodyCompositionForChart = async () => {
+    try {
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 42); // 6 weeks
+
+        const measures = await getBodyMeasures(startDate, endDate);
+
+        // Group by week and get average/latest per week
+        const weeklyData = {};
+
+        measures.forEach(m => {
+            const weekKey = getWeekKey(m.date);
+            if (!weeklyData[weekKey]) {
+                weeklyData[weekKey] = {
+                    date: m.date,
+                    weights: [],
+                    fatRatios: [],
+                    muscleMasses: []
+                };
+            }
+            if (m.weight) weeklyData[weekKey].weights.push(m.weight);
+            if (m.fatRatio) weeklyData[weekKey].fatRatios.push(m.fatRatio);
+            if (m.muscleMass) weeklyData[weekKey].muscleMasses.push(m.muscleMass);
+        });
+
+        // Calculate averages
+        return Object.entries(weeklyData)
+            .map(([key, data]) => ({
+                week: key,
+                date: data.date,
+                weight: avg(data.weights),
+                fatRatio: avg(data.fatRatios),
+                muscleMass: avg(data.muscleMasses)
+            }))
+            .sort((a, b) => a.date - b.date); // Oldest first for chart
+    } catch (error) {
+        console.error('Error getting body composition for chart:', error);
+        return [];
+    }
+};
+
+// Helper: Get week key matching Strava format (start of week, Monday-based, e.g., "03/02")
+const getWeekKey = (date) => {
+    const d = new Date(date);
+    // Get Monday of this week
+    const dayOfWeek = d.getDay();
+    const diff = d.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust for Sunday
+    const monday = new Date(d);
+    monday.setDate(diff);
+    const day = monday.getDate().toString().padStart(2, '0');
+    const month = (monday.getMonth() + 1).toString().padStart(2, '0');
+    return `${day}/${month}`;
+};
+
+// Helper: Calculate average
+const avg = (arr) => {
+    if (!arr || arr.length === 0) return null;
+    return Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 10) / 10;
+};
