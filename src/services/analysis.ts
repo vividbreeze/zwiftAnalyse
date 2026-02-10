@@ -1,5 +1,6 @@
 
 import { userProfile, calculateZones, getZoneForHr } from '../config/user';
+import type { HRZones, Lap, EnrichedActivity, WeeklyStats, PerformanceMetrics, OverallProgress, LatestWeight, BodyCompositionEntry, ActivityAnalysis, ZoneDistribution, WeightInsight } from '../types';
 
 /**
  * Estimate HR Zone Distribution based on Avg HR and Max HR
@@ -13,7 +14,7 @@ import { userProfile, calculateZones, getZoneForHr } from '../config/user';
  * - Z3: ~25% (transition to peaks)
  * - Z4: ~10% (peak intervals)
  */
-export const estimateZoneDistribution = (avgHr, maxHr, durationMinutes, zones) => {
+export const estimateZoneDistribution = (avgHr: number, maxHr: number, durationMinutes: number, zones: HRZones): Record<string, number> | null => {
     if (!avgHr || !durationMinutes) return null;
 
     const primaryZone = getZoneForHr(avgHr, zones);
@@ -23,7 +24,7 @@ export const estimateZoneDistribution = (avgHr, maxHr, durationMinutes, zones) =
     const primaryNum = parseInt(primaryZone.slice(1));
     const peakNum = parseInt(peakZone.slice(1));
 
-    let dist = { Z1: 0, Z2: 0, Z3: 0, Z4: 0, Z5: 0 };
+    let dist: Record<string, number> = { Z1: 0, Z2: 0, Z3: 0, Z4: 0, Z5: 0 };
 
     // Base allocation strategy:
     // 1. Warmup in Z1: Always 10-15%
@@ -83,7 +84,7 @@ export const estimateZoneDistribution = (avgHr, maxHr, durationMinutes, zones) =
 };
 
 // analysis.js cleanup
-export const analyzeActivity = (activity, laps, stats) => {
+export const analyzeActivity = (activity: EnrichedActivity, laps: Lap[], stats: WeeklyStats[]): ActivityAnalysis => {
     if (!laps || laps.length === 0) {
         return {
             feedback: "No interval data available for detailed analysis.",
@@ -110,9 +111,9 @@ export const analyzeActivity = (activity, laps, stats) => {
     };
 };
 
-const analyzeZones = (laps, zones) => {
+const analyzeZones = (laps: Lap[], zones: HRZones): ZoneDistribution | null => {
     // Initialize counters (minutes)
-    const distribution = { Z1: 0, Z2: 0, Z3: 0, Z4: 0, Z5: 0 };
+    const distribution: Record<string, number> = { Z1: 0, Z2: 0, Z3: 0, Z4: 0, Z5: 0 };
     let totalMinutes = 0;
 
     laps.forEach(lap => {
@@ -129,7 +130,7 @@ const analyzeZones = (laps, zones) => {
     if (totalMinutes === 0) return null;
 
     // formatted strings
-    const formatted = {};
+    const formatted: Record<string, { minutes: string; pct: string }> = {};
     let maxZone = 'Z1';
     let maxVal = 0;
 
@@ -152,8 +153,8 @@ const analyzeZones = (laps, zones) => {
     };
 };
 
-const getZoneMessage = (primaryZone, pct) => {
-    const descriptions = {
+const getZoneMessage = (primaryZone: string, pct: string): string => {
+    const descriptions: Record<string, string> = {
         Z1: "Active Recovery",
         Z2: "Endurance",
         Z3: "Tempo",
@@ -163,7 +164,7 @@ const getZoneMessage = (primaryZone, pct) => {
     return `You spent **${pct}%** of this activity in **Zone ${primaryZone.slice(1)}** (${descriptions[primaryZone]}).`;
 };
 
-const analyzeTrainingLoad = (activity, stats) => {
+const analyzeTrainingLoad = (activity: EnrichedActivity, stats: WeeklyStats[]) => {
     if (!stats || stats.length === 0) return null;
 
     // Calculate "Normal" Load (Avg kJ per activity over last 6 weeks)
@@ -172,14 +173,14 @@ const analyzeTrainingLoad = (activity, stats) => {
     let totalCount = 0;
 
     stats.forEach(week => {
-        totalWork += parseFloat(week.totalCalories || 0);
-        totalCount += week.count;
+        totalWork += week.totalCalories || 0;
+        totalCount += week.count || 0;
     });
 
     if (totalCount === 0) return null;
 
     const avgWorkPerSession = totalWork / totalCount;
-    const currentWork = parseFloat(activity.totalCalories || 0);
+    const currentWork = activity.totalCalories || 0;
 
     const loadRatio = currentWork / avgWorkPerSession;
 
@@ -204,17 +205,17 @@ const analyzeTrainingLoad = (activity, stats) => {
     };
 };
 
-const analyzeHistory = (activity, stats) => {
+const analyzeHistory = (activity: EnrichedActivity, stats: WeeklyStats[]) => {
     if (!stats || stats.length === 0) return null;
 
     const validEFWeeks = stats.filter(week => week.efficiencyFactor > 0);
 
     if (validEFWeeks.length === 0) return null;
 
-    const totalEF = validEFWeeks.reduce((sum, week) => sum + parseFloat(week.efficiencyFactor), 0);
+    const totalEF = validEFWeeks.reduce((sum, week) => sum + week.efficiencyFactor, 0);
     const avgEF = totalEF / validEFWeeks.length;
 
-    const currentEF = parseFloat(activity.efficiencyFactor || 0);
+    const currentEF = Number(activity.efficiencyFactor) || 0;
 
     if (avgEF === 0 || currentEF === 0) return null;
 
@@ -228,7 +229,7 @@ const analyzeHistory = (activity, stats) => {
     };
 };
 
-const getHistoryMessage = (improvement, avgEF) => {
+const getHistoryMessage = (improvement: number, avgEF: string): string => {
     if (improvement > 5) {
         return `Strong performance! Your Efficiency Factor is ${improvement.toFixed(2)}% higher than your 6-week average (${avgEF}).`;
     } else if (improvement < -5) {
@@ -238,8 +239,8 @@ const getHistoryMessage = (improvement, avgEF) => {
     }
 };
 
-const analyzeCardiacDrift = (laps) => {
-    const workLaps = laps.filter(lap => lap.moving_time > 120 && lap.average_watts > 50);
+const analyzeCardiacDrift = (laps: Lap[]) => {
+    const workLaps = laps.filter(lap => lap.moving_time > 120 && (lap.average_watts ?? 0) > 50);
 
     if (workLaps.length < 2) return null;
 
@@ -266,7 +267,7 @@ const analyzeCardiacDrift = (laps) => {
     };
 };
 
-const calculateAverageEF = (laps) => {
+const calculateAverageEF = (laps: Lap[]): number => {
     const totalEF = laps.reduce((sum, lap) => {
         const ef = (lap.average_watts && lap.average_heartrate)
             ? lap.average_watts / lap.average_heartrate
@@ -276,12 +277,12 @@ const calculateAverageEF = (laps) => {
     return totalEF / laps.length;
 };
 
-const calculateAveragePower = (laps) => {
+const calculateAveragePower = (laps: Lap[]): number => {
     const totalPower = laps.reduce((sum, lap) => sum + (lap.average_watts || 0), 0);
     return totalPower / laps.length;
 };
 
-const getDecouplingMessage = (decoupling, powerDiff) => {
+const getDecouplingMessage = (decoupling: number, powerDiff: number): string => {
     if (Math.abs(powerDiff) > 20) {
         return "Power output varied between halves, so drift analysis is less reliable.";
     }
@@ -295,7 +296,7 @@ const getDecouplingMessage = (decoupling, powerDiff) => {
     }
 };
 
-const analyzeCompliance = (laps) => {
+const analyzeCompliance = (laps: Lap[]): string | null => {
     if (laps.length < 3) return null;
 
     const firstLap = laps[0];
@@ -313,7 +314,7 @@ const analyzeCompliance = (laps) => {
     return "Great execution! You held the cadence steady throughout the session, matching the workout demands.";
 };
 
-const generateNaturalLanguageFeedback = (activity, drift, compliance, history, load, zones) => {
+const generateNaturalLanguageFeedback = (activity: EnrichedActivity, drift: ReturnType<typeof analyzeCardiacDrift>, compliance: string | null, history: ReturnType<typeof analyzeHistory>, load: ReturnType<typeof analyzeTrainingLoad>, zones: ZoneDistribution | null): string => {
     const lines = [];
 
     lines.push(`## ${activity.name}`);
@@ -333,7 +334,7 @@ const generateNaturalLanguageFeedback = (activity, drift, compliance, history, l
 
     if (drift) {
         lines.push(`\n**Cardiac Drift**: ${drift.message}`);
-        if (drift.decoupling > 5) {
+        if (Number(drift.decoupling) > 5) {
             lines.push(`(Decoupling: ${drift.decoupling}%)`);
         }
     }
@@ -353,8 +354,8 @@ const generateNaturalLanguageFeedback = (activity, drift, compliance, history, l
  * @param {Array} allStats - All weeks' training stats
  * @returns {Object} Performance metrics
  */
-export const calculatePerformanceMetrics = (currentStats, latestWeight, bodyComposition = [], allStats = []) => {
-    const metrics = {
+export const calculatePerformanceMetrics = (currentStats: WeeklyStats | undefined, latestWeight: LatestWeight | null, bodyComposition: BodyCompositionEntry[] = [], allStats: WeeklyStats[] = []): PerformanceMetrics => {
+    const metrics: PerformanceMetrics = {
         powerToWeight: null,
         powerToWeightTrend: null,
         efficiencyPerKg: null,
@@ -369,7 +370,7 @@ export const calculatePerformanceMetrics = (currentStats, latestWeight, bodyComp
 
     const weight = latestWeight.weight;
     const avgPower = currentStats.avgPower || 0;
-    const efficiencyFactor = parseFloat(currentStats.efficiencyFactor) || 0;
+    const efficiencyFactor = currentStats.efficiencyFactor || 0;
 
     // 1. Power-to-Weight Ratio (W/kg)
     if (avgPower > 0 && weight > 0) {
@@ -391,8 +392,8 @@ export const calculatePerformanceMetrics = (currentStats, latestWeight, bodyComp
         });
 
         if (sortedByDate.length >= 2) {
-            const firstWeight = sortedByDate[0].weight;
-            const lastWeight = sortedByDate[sortedByDate.length - 1].weight;
+            const firstWeight = sortedByDate[0].weight!;
+            const lastWeight = sortedByDate[sortedByDate.length - 1].weight!;
             const weightChange = lastWeight - firstWeight;
 
             metrics.weightTrend = {
@@ -409,14 +410,18 @@ export const calculatePerformanceMetrics = (currentStats, latestWeight, bodyComp
         const withMuscleMass = sortedByDate.filter(d => d.muscleMass);
 
         if (withFatRatio.length >= 2) {
-            const fatChange = withFatRatio[withFatRatio.length - 1].fatRatio - withFatRatio[0].fatRatio;
+            const lastFat = withFatRatio[withFatRatio.length - 1].fatRatio!;
+            const firstFat = withFatRatio[0].fatRatio!;
+            const fatChange = lastFat - firstFat;
             metrics.bodyCompTrend = metrics.bodyCompTrend || {};
             metrics.bodyCompTrend.fatChange = fatChange.toFixed(1);
             metrics.bodyCompTrend.fatDirection = fatChange > 0.5 ? 'up' : fatChange < -0.5 ? 'down' : 'stable';
         }
 
         if (withMuscleMass.length >= 2) {
-            const muscleChange = withMuscleMass[withMuscleMass.length - 1].muscleMass - withMuscleMass[0].muscleMass;
+            const lastMuscle = withMuscleMass[withMuscleMass.length - 1].muscleMass!;
+            const firstMuscle = withMuscleMass[0].muscleMass!;
+            const muscleChange = lastMuscle - firstMuscle;
             metrics.bodyCompTrend = metrics.bodyCompTrend || {};
             metrics.bodyCompTrend.muscleChange = muscleChange.toFixed(1);
             metrics.bodyCompTrend.muscleDirection = muscleChange > 0.5 ? 'up' : muscleChange < -0.5 ? 'down' : 'stable';
@@ -438,8 +443,8 @@ export const calculatePerformanceMetrics = (currentStats, latestWeight, bodyComp
         }).filter(Boolean);
 
         if (matchedWeeks.length >= 2) {
-            const firstPW = matchedWeeks[0].powerToWeight;
-            const lastPW = matchedWeeks[matchedWeeks.length - 1].powerToWeight;
+            const firstPW = matchedWeeks[0]!.powerToWeight;
+            const lastPW = matchedWeeks[matchedWeeks.length - 1]!.powerToWeight;
             const pwChange = ((lastPW - firstPW) / firstPW) * 100;
 
             metrics.powerToWeightTrend = {
@@ -458,7 +463,7 @@ export const calculatePerformanceMetrics = (currentStats, latestWeight, bodyComp
 /**
  * Generate human-readable performance insight based on metrics
  */
-const generatePerformanceInsight = (metrics, weightData, stats) => {
+const generatePerformanceInsight = (metrics: PerformanceMetrics, _weightData: LatestWeight | null, _stats: WeeklyStats | undefined): string[] | null => {
     const insights = [];
 
     // Power-to-Weight context
@@ -480,7 +485,7 @@ const generatePerformanceInsight = (metrics, weightData, stats) => {
         if (trend.direction === 'down') {
             insights.push(`📉 Gewicht: **${trend.change} kg** über ${trend.weeks} Wochen – gut für W/kg!`);
         } else if (trend.direction === 'up') {
-            insights.push(`📈 Gewicht: **+${Math.abs(trend.change)} kg** – prüfe ob Muskelaufbau oder Fett.`);
+            insights.push(`📈 Gewicht: **+${Math.abs(Number(trend.change))} kg** – prüfe ob Muskelaufbau oder Fett.`);
         }
     }
 
@@ -488,7 +493,7 @@ const generatePerformanceInsight = (metrics, weightData, stats) => {
     if (metrics.bodyCompTrend) {
         const bc = metrics.bodyCompTrend;
         if (bc.fatDirection === 'down' && bc.muscleDirection !== 'down') {
-            insights.push(`✅ Ideale Körperkomposition: Fett ↓ ${Math.abs(bc.fatChange)}%`);
+            insights.push(`✅ Ideale Körperkomposition: Fett ↓ ${Math.abs(Number(bc.fatChange))}%`);
         } else if (bc.muscleDirection === 'up') {
             insights.push(`💪 Muskelaufbau: +${bc.muscleChange} kg`);
         }
@@ -502,7 +507,7 @@ const generatePerformanceInsight = (metrics, weightData, stats) => {
     return insights.length > 0 ? insights : null;
 };
 
-export const analyzeOverallProgress = (stats, weightData = null, bodyComposition = []) => {
+export const analyzeOverallProgress = (stats: WeeklyStats[], weightData: LatestWeight | null = null, bodyComposition: BodyCompositionEntry[] = []): OverallProgress => {
     if (!stats || stats.length < 2) {
         return {
             status: "Insufficient Data",
@@ -521,14 +526,14 @@ export const analyzeOverallProgress = (stats, weightData = null, bodyComposition
     // Calculate baseline EF (avg of previous weeks)
     const validEFWeeks = previousWeeks.filter(w => w.efficiencyFactor > 0);
     const baselineEF = validEFWeeks.length > 0
-        ? validEFWeeks.reduce((sum, w) => sum + parseFloat(w.efficiencyFactor), 0) / validEFWeeks.length
+        ? validEFWeeks.reduce((sum, w) => sum + w.efficiencyFactor, 0) / validEFWeeks.length
         : 0;
 
-    const currentEF = parseFloat(currentWeek.efficiencyFactor || 0);
+    const currentEF = currentWeek.efficiencyFactor || 0;
 
     // Calculate Volume Baseline
-    const baselineWork = previousWeeks.reduce((sum, w) => sum + parseFloat(w.totalCalories), 0) / previousWeeks.length;
-    const currentWork = parseFloat(currentWeek.totalCalories || 0);
+    const baselineWork = previousWeeks.reduce((sum, w) => sum + (w.totalCalories || 0), 0) / previousWeeks.length;
+    const currentWork = currentWeek.totalCalories || 0;
 
     // Logic
     let status = "Maintaining";
@@ -537,11 +542,11 @@ export const analyzeOverallProgress = (stats, weightData = null, bodyComposition
     let color = "bg-blue-50 border-blue-200";
 
     // Zone Analysis (based on current week's accumulated distribution)
-    const z1Pct = parseFloat(currentWeek.zonePcts?.Z1 || 0);
-    const z2Pct = parseFloat(currentWeek.zonePcts?.Z2 || 0);
-    const z3Pct = parseFloat(currentWeek.zonePcts?.Z3 || 0);
-    const z4Pct = parseFloat(currentWeek.zonePcts?.Z4 || 0);
-    const z5Pct = parseFloat(currentWeek.zonePcts?.Z5 || 0);
+    const z1Pct = Number(currentWeek.zonePcts?.Z1 || 0);
+    const z2Pct = Number(currentWeek.zonePcts?.Z2 || 0);
+    const z3Pct = Number(currentWeek.zonePcts?.Z3 || 0);
+    const z4Pct = Number(currentWeek.zonePcts?.Z4 || 0);
+    const z5Pct = Number(currentWeek.zonePcts?.Z5 || 0);
 
     // Calculate polarization (Z1+Z2 for base, Z4+Z5 for intensity)
     const basePct = z1Pct + z2Pct;
@@ -607,7 +612,7 @@ export const analyzeOverallProgress = (stats, weightData = null, bodyComposition
     }
 
     // Weight Analysis
-    let weightInsight = null;
+    let weightInsight: WeightInsight | null = null;
     if (weightData && weightData.weight) {
         const currentWeight = weightData.weight;
         weightInsight = {

@@ -3,12 +3,13 @@ import { userProfile, calculateZones, getZoneForHr } from '../config/user';
 import { estimateZoneDistribution } from './analysis';
 import { loadSettings } from '../components/Settings';
 import { startOfWeek, endOfWeek, subWeeks, isWithinInterval, format, parseISO } from 'date-fns';
+import type { StravaTokenResponse, StravaActivity, StravaCredentials, WeeklyStats } from '../types';
 
 /**
  * Get Strava credentials from localStorage settings or environment variables
  * @returns {{ clientId: string, clientSecret: string }}
  */
-const getStravaCredentials = () => {
+const getStravaCredentials = (): StravaCredentials => {
     const settings = loadSettings();
     return {
         clientId: settings.stravaClientId || import.meta.env.VITE_STRAVA_CLIENT_ID,
@@ -22,7 +23,7 @@ const REDIRECT_URI = 'http://localhost:5173/'; // Adjust if needed
  * Generate Strava OAuth authorization URL
  * @returns {string} Authorization URL to redirect user to
  */
-export const getAuthUrl = () => {
+export const getAuthUrl = (): string => {
     const { clientId } = getStravaCredentials();
     const scope = 'activity:read_all';
     return `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${REDIRECT_URI}&approval_prompt=force&scope=${scope}`;
@@ -34,7 +35,7 @@ export const getAuthUrl = () => {
  * @returns {Promise<Object>} Token response with access_token, refresh_token, etc.
  * @throws {Error} If token exchange fails
  */
-export const getToken = async (code) => {
+export const getToken = async (code: string): Promise<StravaTokenResponse> => {
     try {
         const { clientId, clientSecret } = getStravaCredentials();
         const response = await axios.post('https://www.strava.com/oauth/token', {
@@ -56,7 +57,7 @@ export const getToken = async (code) => {
  * @returns {Promise<Object[]>} Array of activity summaries
  * @throws {Error} If API request fails
  */
-export const getActivities = async (accessToken) => {
+export const getActivities = async (accessToken: string): Promise<StravaActivity[]> => {
     try {
         const before = Math.floor(Date.now() / 1000);
         const after = Math.floor(subWeeks(new Date(), 6).getTime() / 1000);
@@ -83,7 +84,7 @@ export const getActivities = async (accessToken) => {
  * @returns {Promise<Object>} Detailed activity with laps array
  * @throws {Error} If API request fails
  */
-export const getActivityDetails = async (accessToken, activityId) => {
+export const getActivityDetails = async (accessToken: string, activityId: number): Promise<StravaActivity> => {
     try {
         const response = await axios.get(`https://www.strava.com/api/v3/activities/${activityId}`, {
             headers: { Authorization: `Bearer ${accessToken}` },
@@ -104,8 +105,8 @@ export const getActivityDetails = async (accessToken, activityId) => {
  * @returns {Object[]} Weekly stats with avgPower, avgHeartRate, efficiencyFactor,
  *   zoneDistribution, activities, and more
  */
-export const calculateStats = (activities) => {
-    const weeks = [];
+export const calculateStats = (activities: StravaActivity[]): WeeklyStats[] => {
+    const weeks: any[] = [];
     const zones = calculateZones(userProfile.maxHr); // Get zones once
 
     for (let i = 0; i < 6; i++) {
@@ -122,8 +123,8 @@ export const calculateStats = (activities) => {
             cadenceSum: 0,
             cadenceTime: 0,
             count: 0,
-            zoneDistribution: { Z1: 0, Z2: 0, Z3: 0, Z4: 0, Z5: 0 }, // New: Accumulate minutes
-            activities: [],
+            zoneDistribution: { Z1: 0, Z2: 0, Z3: 0, Z4: 0, Z5: 0 } as Record<string, number>,
+            activities: [] as any[],
         });
     }
 
@@ -141,7 +142,7 @@ export const calculateStats = (activities) => {
                 const durationMinutes = activity.moving_time / 60;
                 const estimated = estimateZoneDistribution(
                     activity.average_heartrate,
-                    activity.max_heartrate, // Use Max HR for peak zones
+                    activity.max_heartrate ?? activity.average_heartrate, // Use Max HR for peak zones
                     durationMinutes,
                     zones
                 );
@@ -175,19 +176,19 @@ export const calculateStats = (activities) => {
             const activityZoneDist = activity.average_heartrate
                 ? estimateZoneDistribution(
                     activity.average_heartrate,
-                    activity.max_heartrate,
+                    activity.max_heartrate ?? activity.average_heartrate,
                     durationMinutes,
                     zones
                 )
                 : null;
 
             // Convert to percentages for rendering
-            let activityZonePcts = null;
+            let activityZonePcts: Record<string, string | number> | null = null;
             if (activityZoneDist) {
                 const totalMin = Object.values(activityZoneDist).reduce((a, b) => a + b, 0);
                 activityZonePcts = {};
                 Object.keys(activityZoneDist).forEach(z => {
-                    activityZonePcts[z] = totalMin > 0
+                    activityZonePcts![z] = totalMin > 0
                         ? ((activityZoneDist[z] / totalMin) * 100).toFixed(0)
                         : 0;
                 });
@@ -218,11 +219,11 @@ export const calculateStats = (activities) => {
     return chronoSortedWeeks.map((week, index) => {
         const prevWeek = index > 0 ? chronoSortedWeeks[index - 1] : null;
 
-        week.activities.sort((a, b) => new Date(b.start_date) - new Date(a.start_date));
+        week.activities.sort((a: any, b: any) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
 
         // Calculate % distribution for the week
-        const totalZoneMinutes = Object.values(week.zoneDistribution).reduce((a, b) => a + b, 0);
-        const zonePcts = {};
+        const totalZoneMinutes = Object.values(week.zoneDistribution as Record<string, number>).reduce((a: number, b: number) => a + b, 0);
+        const zonePcts: Record<string, string | number> = {};
         Object.keys(week.zoneDistribution).forEach(z => {
             zonePcts[z] = totalZoneMinutes > 0
                 ? ((week.zoneDistribution[z] / totalZoneMinutes) * 100).toFixed(0)

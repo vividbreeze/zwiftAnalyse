@@ -1,13 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { exchangeWithingsCode } from '../services/withings';
 
-/**
- * Withings OAuth callback handler
- * This component handles the redirect from Withings after authorization
- */
-const WithingsCallback = () => {
-    const [status, setStatus] = useState('processing');
-    const [error, setError] = useState(null);
+const WithingsCallback: React.FC = () => {
+    const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const handleCallback = async () => {

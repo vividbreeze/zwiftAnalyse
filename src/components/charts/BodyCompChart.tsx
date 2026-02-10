@@ -1,16 +1,14 @@
 import React from 'react';
 import { Line } from 'react-chartjs-2';
 import { Scale } from 'lucide-react';
+import type { BodyCompositionEntry } from '../../types';
 
-/**
- * Body Composition chart from Withings data
- * Shows weight, fat ratio, and muscle mass trends
- * 
- * @param {Object} props
- * @param {string[]} props.labels - Week labels (shared with training data)
- * @param {Object[]} props.bodyComposition - Withings body composition data points
- */
-const BodyCompChart = ({ labels, bodyComposition }) => {
+interface BodyCompChartProps {
+    labels: string[];
+    bodyComposition: BodyCompositionEntry[];
+}
+
+const BodyCompChart: React.FC<BodyCompChartProps> = ({ labels, bodyComposition }) => {
     const data = {
         labels,
         datasets: [
@@ -56,10 +54,10 @@ const BodyCompChart = ({ labels, bodyComposition }) => {
 
     const options = {
         responsive: true,
-        interaction: { mode: 'index', intersect: false },
+        interaction: { mode: 'index' as const, intersect: false },
         scales: {
-            y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'kg' } },
-            y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: '%' }, grid: { drawOnChartArea: false } },
+            y: { type: 'linear' as const, display: true, position: 'left' as const, title: { display: true, text: 'kg' } },
+            y1: { type: 'linear' as const, display: true, position: 'right' as const, title: { display: true, text: '%' }, grid: { drawOnChartArea: false } },
         },
     };
 

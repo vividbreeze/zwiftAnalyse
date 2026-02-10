@@ -1,15 +1,14 @@
 import React from 'react';
 import { HelpCircle } from 'lucide-react';
 
-/**
- * Summary card component for displaying key metrics
- * @param {Object} props
- * @param {string} props.title - Card title
- * @param {string} props.value - Metric value to display
- * @param {ReactNode} props.icon - Icon component
- * @param {string} [props.tooltip] - Optional tooltip text
- */
-const SummaryCard = ({ title, value, icon, tooltip }) => (
+interface SummaryCardProps {
+    title: string;
+    value: string;
+    icon: React.ReactNode;
+    tooltip?: string;
+}
+
+const SummaryCard: React.FC<SummaryCardProps> = ({ title, value, icon, tooltip }) => (
     <div className="bg-white p-4 rounded-lg shadow flex items-center gap-4 relative group">
         <div className="p-3 bg-gray-50 rounded-full">{icon}</div>
         <div className="flex-1">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Settings as SettingsIcon, Save, X, User, Heart, Zap, Key } from 'lucide-react';
+import type { AppSettings } from '../types';
 
 // Default values matching current config
 const DEFAULT_SETTINGS = {
@@ -26,11 +27,11 @@ const DEFAULT_SETTINGS = {
 
     // Display Options
     weeksToShow: 6,
-    zoneMethod: 'karvonen', // 'karvonen' or 'percentMax'
+    zoneMethod: 'karvonen' as const, // 'karvonen' or 'percentMax'
 };
 
 // Load settings from localStorage or use defaults
-export const loadSettings = () => {
+export const loadSettings = (): AppSettings => {
     try {
         const saved = localStorage.getItem('zwiftAnalyseSettings');
         if (saved) {
@@ -43,7 +44,7 @@ export const loadSettings = () => {
 };
 
 // Save settings to localStorage
-export const saveSettings = (settings) => {
+export const saveSettings = (settings: AppSettings): boolean => {
     try {
         localStorage.setItem('zwiftAnalyseSettings', JSON.stringify(settings));
         return true;
@@ -53,8 +54,14 @@ export const saveSettings = (settings) => {
     }
 };
 
-const Settings = ({ isOpen, onClose, onSave }) => {
-    const [settings, setSettings] = useState(loadSettings());
+interface SettingsProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSave: (settings: AppSettings) => void;
+}
+
+const Settings: React.FC<SettingsProps> = ({ isOpen, onClose, onSave }) => {
+    const [settings, setSettings] = useState<AppSettings>(loadSettings());
     const [saved, setSaved] = useState(false);
 
     useEffect(() => {
@@ -64,7 +71,7 @@ const Settings = ({ isOpen, onClose, onSave }) => {
         }
     }, [isOpen]);
 
-    const handleChange = (field, value) => {
+    const handleChange = (field: keyof AppSettings, value: any) => {
         setSettings(prev => ({ ...prev, [field]: value }));
         setSaved(false);
     };

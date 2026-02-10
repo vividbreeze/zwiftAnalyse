@@ -1,18 +1,10 @@
 import React from 'react';
 
-/**
- * Format feedback text with Markdown-like rendering
- * 
- * Supports:
- * - **bold** text
- * - ## headers
- * - Newline handling for multi-paragraph content
- * 
- * @param {Object} props
- * @param {string} props.text - Text to format
- * @returns {JSX.Element|null}
- */
-const FormatFeedback = ({ text }) => {
+interface FormatFeedbackProps {
+    text: string;
+}
+
+const FormatFeedback: React.FC<FormatFeedbackProps> = ({ text }) => {
     if (!text) return null;
 
     const lines = text.split('\n');

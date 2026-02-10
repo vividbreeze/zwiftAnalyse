@@ -1,15 +1,13 @@
 import React from 'react';
 import { Line } from 'react-chartjs-2';
+import type { WeeklyStats } from '../../types';
 
-/**
- * Efficiency Factor trend chart
- * Shows aerobic efficiency (Power / Avg HR) over time
- * 
- * @param {Object} props
- * @param {string[]} props.labels - Week labels
- * @param {Object[]} props.stats - Weekly stats with efficiencyFactor
- */
-const EfficiencyChart = ({ labels, stats }) => {
+interface EfficiencyChartProps {
+    labels: string[];
+    stats: WeeklyStats[];
+}
+
+const EfficiencyChart: React.FC<EfficiencyChartProps> = ({ labels, stats }) => {
     const data = {
         labels,
         datasets: [

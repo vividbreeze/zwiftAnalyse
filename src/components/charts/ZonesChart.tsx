@@ -1,9 +1,9 @@
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import { userProfile } from '../../config/user';
+import type { WeeklyStats, HRZones } from '../../types';
 
-/** Zone colors for consistent chart rendering */
-const ZONE_COLORS = {
+const ZONE_COLORS: Record<string, string> = {
     Z1: 'rgba(156, 163, 175, 0.8)',
     Z2: 'rgba(59, 130, 246, 0.8)',
     Z3: 'rgba(34, 197, 94, 0.8)',
@@ -11,16 +11,13 @@ const ZONE_COLORS = {
     Z5: 'rgba(239, 68, 68, 0.8)',
 };
 
-/**
- * Weekly HR Zone Distribution stacked bar chart
- * Shows time spent in each zone per week
- * 
- * @param {Object} props
- * @param {string[]} props.labels - Week labels
- * @param {Object[]} props.stats - Weekly stats with zoneDistribution
- * @param {Object} props.zones - Calculated HR zones with z1-z5 ranges
- */
-const ZonesChart = ({ labels, stats, zones }) => {
+interface ZonesChartProps {
+    labels: string[];
+    stats: WeeklyStats[];
+    zones: HRZones;
+}
+
+const ZonesChart: React.FC<ZonesChartProps> = ({ labels, stats, zones }) => {
     const data = {
         labels,
         datasets: ['Z1', 'Z2', 'Z3', 'Z4', 'Z5'].map(zone => ({

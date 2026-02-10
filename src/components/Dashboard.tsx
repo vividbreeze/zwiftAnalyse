@@ -6,6 +6,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, PointElement,
 import { Activity, Clock, TrendingUp, Settings as SettingsIcon, Scale } from 'lucide-react';
 import { calculateZones, userProfile } from '../config/user';
 import Settings, { loadSettings } from './Settings';
+import type { WeeklyStats, EnrichedActivity, StravaActivity, BodyCompositionEntry, LatestWeight, ActivityAnalysis, HRZones } from '../types';
 
 // Extracted components
 import CoachAssessment from './CoachAssessment';
@@ -26,18 +27,22 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineEleme
  * @param {Object} props
  * @param {Object[]} props.stats - Weekly training statistics from Strava
  */
-const Dashboard = ({ stats }) => {
-    const [expandedWeeks, setExpandedWeeks] = useState({});
-    const [selectedActivity, setSelectedActivity] = useState(null);
-    const [detailedActivity, setDetailedActivity] = useState(null);
+interface DashboardProps {
+    stats: WeeklyStats[];
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ stats }) => {
+    const [expandedWeeks, setExpandedWeeks] = useState<Record<number, boolean>>({});
+    const [selectedActivity, setSelectedActivity] = useState<EnrichedActivity | null>(null);
+    const [detailedActivity, setDetailedActivity] = useState<StravaActivity | null>(null);
     const [loadingDetails, setLoadingDetails] = useState(false);
-    const [analysisValues, setAnalysisValues] = useState(null);
+    const [analysisValues, setAnalysisValues] = useState<ActivityAnalysis | null>(null);
     const [settingsOpen, setSettingsOpen] = useState(false);
 
     // Withings state
     const [withingsConnected, setWithingsConnected] = useState(false);
-    const [bodyComposition, setBodyComposition] = useState([]);
-    const [latestWeight, setLatestWeight] = useState(null);
+    const [bodyComposition, setBodyComposition] = useState<BodyCompositionEntry[]>([]);
+    const [latestWeight, setLatestWeight] = useState<LatestWeight | null>(null);
     const [loadingWithings, setLoadingWithings] = useState(false);
 
     const zones = calculateZones(userProfile.maxHr, userProfile.restingHr);
@@ -82,7 +87,7 @@ const Dashboard = ({ stats }) => {
     };
 
     /** Fetch and analyze activity details */
-    const handleActivityClick = async (activity) => {
+    const handleActivityClick = async (activity: EnrichedActivity) => {
         setSelectedActivity(activity);
         setDetailedActivity(null);
         setAnalysisValues(null);
@@ -103,7 +108,7 @@ const Dashboard = ({ stats }) => {
         }
     };
 
-    const toggleWeek = (index) => {
+    const toggleWeek = (index: number) => {
         setExpandedWeeks(prev => ({ ...prev, [index]: !prev[index] }));
     };
 

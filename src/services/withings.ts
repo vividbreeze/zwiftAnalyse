@@ -1,5 +1,34 @@
 import axios from 'axios';
 import { loadSettings, saveSettings } from '../components/Settings';
+import type { WithingsTokenData, BodyCompositionEntry, LatestWeight } from '../types';
+
+interface WithingsCredentials {
+    clientId: string;
+    clientSecret: string;
+}
+
+interface WithingsTokens {
+    accessToken: string | null;
+    refreshToken: string | null;
+    expiresAt: number | null;
+    userId: string | null;
+}
+
+interface ParsedMeasurement {
+    date: Date;
+    timestamp: number;
+    weight?: number;
+    fatRatio?: number;
+    muscleMass?: number;
+    fatMass?: number;
+}
+
+interface WeeklyAccumulator {
+    date: Date;
+    weights: number[];
+    fatRatios: number[];
+    muscleMasses: number[];
+}
 
 // Withings API endpoints
 const WITHINGS_AUTH_URL = 'https://account.withings.com/oauth2_user/authorize2';
@@ -22,7 +51,7 @@ const MEAS_TYPES = {
 /**
  * Get Withings credentials from settings
  */
-const getWithingsCredentials = () => {
+const getWithingsCredentials = (): WithingsCredentials => {
     const settings = loadSettings();
     return {
         clientId: settings.withingsClientId || '',
@@ -33,7 +62,7 @@ const getWithingsCredentials = () => {
 /**
  * Get stored Withings tokens
  */
-export const getWithingsTokens = () => {
+export const getWithingsTokens = (): WithingsTokens => {
     const settings = loadSettings();
     return {
         accessToken: settings.withingsAccessToken || null,
@@ -46,7 +75,7 @@ export const getWithingsTokens = () => {
 /**
  * Store Withings tokens in settings
  */
-const storeWithingsTokens = (tokenData) => {
+const storeWithingsTokens = (tokenData: WithingsTokenData): void => {
     const settings = loadSettings();
     const expiresAt = Date.now() + (tokenData.expires_in * 1000);
 
@@ -62,7 +91,7 @@ const storeWithingsTokens = (tokenData) => {
 /**
  * Clear Withings tokens (disconnect)
  */
-export const disconnectWithings = () => {
+export const disconnectWithings = (): void => {
     const settings = loadSettings();
     saveSettings({
         ...settings,
@@ -76,7 +105,7 @@ export const disconnectWithings = () => {
 /**
  * Check if Withings is connected
  */
-export const isWithingsConnected = () => {
+export const isWithingsConnected = (): boolean => {
     const { accessToken } = getWithingsTokens();
     return !!accessToken;
 };
@@ -84,7 +113,7 @@ export const isWithingsConnected = () => {
 /**
  * Generate authorization URL for Withings OAuth
  */
-export const getWithingsAuthUrl = () => {
+export const getWithingsAuthUrl = (): string | null => {
     const { clientId } = getWithingsCredentials();
     if (!clientId) {
         console.error('Withings Client ID not configured');
@@ -111,7 +140,7 @@ export const getWithingsAuthUrl = () => {
 /**
  * Exchange authorization code for tokens
  */
-export const exchangeWithingsCode = async (code) => {
+export const exchangeWithingsCode = async (code: string): Promise<WithingsTokenData> => {
     try {
         const { clientId, clientSecret } = getWithingsCredentials();
 
@@ -143,7 +172,7 @@ export const exchangeWithingsCode = async (code) => {
 /**
  * Refresh the access token
  */
-const refreshWithingsToken = async () => {
+const refreshWithingsToken = async (): Promise<string> => {
     try {
         const { clientId, clientSecret } = getWithingsCredentials();
         const { refreshToken } = getWithingsTokens();
@@ -182,7 +211,7 @@ const refreshWithingsToken = async () => {
 /**
  * Get valid access token (refresh if needed)
  */
-const getValidAccessToken = async () => {
+const getValidAccessToken = async (): Promise<string> => {
     const { accessToken, expiresAt } = getWithingsTokens();
 
     if (!accessToken) {
@@ -202,16 +231,16 @@ const getValidAccessToken = async () => {
  * @param {Date} startDate - Start of date range
  * @param {Date} endDate - End of date range
  */
-export const getBodyMeasures = async (startDate, endDate) => {
+export const getBodyMeasures = async (startDate: Date, endDate: Date): Promise<ParsedMeasurement[]> => {
     try {
         const accessToken = await getValidAccessToken();
 
         const params = new URLSearchParams({
             action: 'getmeas',
             meastypes: `${MEAS_TYPES.WEIGHT},${MEAS_TYPES.FAT_RATIO},${MEAS_TYPES.MUSCLE_MASS},${MEAS_TYPES.FAT_MASS}`,
-            category: 1, // Real measurements only
-            startdate: Math.floor(startDate.getTime() / 1000),
-            enddate: Math.floor(endDate.getTime() / 1000)
+            category: '1',
+            startdate: String(Math.floor(startDate.getTime() / 1000)),
+            enddate: String(Math.floor(endDate.getTime() / 1000))
         });
 
         const response = await axios.post(WITHINGS_MEASURE_URL, params, {
@@ -235,15 +264,15 @@ export const getBodyMeasures = async (startDate, endDate) => {
 /**
  * Get the latest body measurements
  */
-export const getLatestMeasures = async () => {
+export const getLatestMeasures = async (): Promise<LatestWeight | null> => {
     try {
         const accessToken = await getValidAccessToken();
 
         const params = new URLSearchParams({
             action: 'getmeas',
             meastypes: `${MEAS_TYPES.WEIGHT},${MEAS_TYPES.FAT_RATIO},${MEAS_TYPES.MUSCLE_MASS}`,
-            category: 1,
-            lastupdate: Math.floor((Date.now() - 90 * 24 * 60 * 60 * 1000) / 1000) // Last 90 days
+            category: '1',
+            lastupdate: String(Math.floor((Date.now() - 90 * 24 * 60 * 60 * 1000) / 1000))
         });
 
         const response = await axios.post(WITHINGS_MEASURE_URL, params, {
@@ -273,14 +302,14 @@ export const getLatestMeasures = async () => {
 /**
  * Parse Withings measurement groups into usable format
  */
-const parseMeasurements = (measureGroups) => {
+const parseMeasurements = (measureGroups: any[]): ParsedMeasurement[] => {
     if (!measureGroups) return [];
 
-    return measureGroups.map(group => {
+    return measureGroups.map((group: any) => {
         const date = new Date(group.date * 1000);
-        const result = { date, timestamp: group.date };
+        const result: ParsedMeasurement = { date, timestamp: group.date };
 
-        group.measures.forEach(measure => {
+        group.measures.forEach((measure: any) => {
             // Convert value using unit (value * 10^unit)
             const value = measure.value * Math.pow(10, measure.unit);
 
@@ -307,7 +336,7 @@ const parseMeasurements = (measureGroups) => {
 /**
  * Get body composition data formatted for charts (last 6 weeks)
  */
-export const getBodyCompositionForChart = async () => {
+export const getBodyCompositionForChart = async (): Promise<BodyCompositionEntry[]> => {
     try {
         const endDate = new Date();
         const startDate = new Date();
@@ -316,7 +345,7 @@ export const getBodyCompositionForChart = async () => {
         const measures = await getBodyMeasures(startDate, endDate);
 
         // Group by week and get average/latest per week
-        const weeklyData = {};
+        const weeklyData: Record<string, WeeklyAccumulator> = {};
 
         measures.forEach(m => {
             const weekKey = getWeekKey(m.date);
@@ -337,12 +366,15 @@ export const getBodyCompositionForChart = async () => {
         return Object.entries(weeklyData)
             .map(([key, data]) => ({
                 week: key,
-                date: data.date,
                 weight: avg(data.weights),
                 fatRatio: avg(data.fatRatios),
                 muscleMass: avg(data.muscleMasses)
             }))
-            .sort((a, b) => a.date - b.date); // Oldest first for chart
+            .sort((a, b) => {
+                const [aDay, aMonth] = a.week.split('/').map(Number);
+                const [bDay, bMonth] = b.week.split('/').map(Number);
+                return (aMonth * 100 + aDay) - (bMonth * 100 + bDay);
+            });
     } catch (error) {
         console.error('Error getting body composition for chart:', error);
         return [];
@@ -350,7 +382,7 @@ export const getBodyCompositionForChart = async () => {
 };
 
 // Helper: Get week key matching Strava format (start of week, Monday-based, e.g., "03/02")
-const getWeekKey = (date) => {
+const getWeekKey = (date: Date): string => {
     const d = new Date(date);
     // Get Monday of this week
     const dayOfWeek = d.getDay();
@@ -363,7 +395,7 @@ const getWeekKey = (date) => {
 };
 
 // Helper: Calculate average
-const avg = (arr) => {
+const avg = (arr: number[]): number | null => {
     if (!arr || arr.length === 0) return null;
-    return Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 10) / 10;
+    return Math.round((arr.reduce((a: number, b: number) => a + b, 0) / arr.length) * 10) / 10;
 };

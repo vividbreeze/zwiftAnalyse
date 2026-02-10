@@ -2,17 +2,16 @@ import React from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { getZoneColor } from '../config/user';
+import type { WeeklyStats, EnrichedActivity } from '../types';
 
-/**
- * Weekly Breakdown table with expandable activity rows
- * 
- * @param {Object} props
- * @param {Object[]} props.stats - Weekly stats array
- * @param {Object} props.expandedWeeks - Map of expanded week indices
- * @param {Function} props.onToggleWeek - Handler for expanding/collapsing weeks
- * @param {Function} props.onActivityClick - Handler for clicking an activity
- */
-const WeeklyTable = ({ stats, expandedWeeks, onToggleWeek, onActivityClick }) => {
+interface WeeklyTableProps {
+    stats: WeeklyStats[];
+    expandedWeeks: Record<number, boolean>;
+    onToggleWeek: (index: number) => void;
+    onActivityClick: (activity: EnrichedActivity) => void;
+}
+
+const WeeklyTable: React.FC<WeeklyTableProps> = ({ stats, expandedWeeks, onToggleWeek, onActivityClick }) => {
     return (
         <div className="bg-white rounded-lg shadow overflow-hidden">
             <div className="px-6 py-4 border-b">
@@ -53,7 +52,7 @@ const WeeklyTable = ({ stats, expandedWeeks, onToggleWeek, onActivityClick }) =>
                                 </tr>
                                 {expandedWeeks[index] && (
                                     <tr>
-                                        <td colSpan="9" className="bg-gray-50 p-4">
+                                        <td colSpan={9} className="bg-gray-50 p-4">
                                             <ActivityList
                                                 activities={week.activities}
                                                 onActivityClick={onActivityClick}
@@ -70,14 +69,13 @@ const WeeklyTable = ({ stats, expandedWeeks, onToggleWeek, onActivityClick }) =>
     );
 };
 
-/**
- * Zone distribution bar (mini visualization in table cells)
- * @param {Object} props
- * @param {Object} props.zonePcts - Zone percentages { Z1: '20', Z2: '50', ... }
- */
-const ZoneBar = ({ zonePcts }) => (
+interface ZoneBarProps {
+    zonePcts: Record<string, string>;
+}
+
+const ZoneBar: React.FC<ZoneBarProps> = ({ zonePcts }) => (
     <div className="flex h-2 w-full rounded-full overflow-hidden bg-gray-100">
-        {Object.entries(zonePcts || {}).map(([zone, pct]) => {
+        {Object.entries(zonePcts || {}).map(([zone, pct]: [string, string]) => {
             const width = parseFloat(pct);
             if (width === 0) return null;
             return (
@@ -92,13 +90,12 @@ const ZoneBar = ({ zonePcts }) => (
     </div>
 );
 
-/**
- * Activity list shown when a week is expanded
- * @param {Object} props
- * @param {Object[]} props.activities - List of activities
- * @param {Function} props.onActivityClick - Click handler
- */
-const ActivityList = ({ activities, onActivityClick }) => (
+interface ActivityListProps {
+    activities: EnrichedActivity[];
+    onActivityClick: (activity: EnrichedActivity) => void;
+}
+
+const ActivityList: React.FC<ActivityListProps> = ({ activities, onActivityClick }) => (
     <div className="overflow-hidden rounded-lg border border-gray-200">
         <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">

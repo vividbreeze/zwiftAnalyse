@@ -3,19 +3,18 @@ import { Activity, TrendingUp, X } from 'lucide-react';
 import { getZoneForHr, getZoneColor } from '../config/user';
 import SummaryCard from './SummaryCard';
 import FormatFeedback from './FormatFeedback';
+import type { EnrichedActivity, StravaActivity, ActivityAnalysis, HRZones } from '../types';
 
-/**
- * Activity Detail Modal - shows detailed analysis for a single activity
- * 
- * @param {Object} props
- * @param {Object} props.activity - Strava activity summary
- * @param {Object} props.detailedActivity - Detailed activity with laps
- * @param {Object} props.analysisValues - Analysis results (feedback, metrics)
- * @param {boolean} props.loadingDetails - Whether details are still loading
- * @param {Object} props.zones - HR zone ranges
- * @param {Function} props.onClose - Close handler
- */
-const ActivityModal = ({ activity, detailedActivity, analysisValues, loadingDetails, zones, onClose }) => {
+interface ActivityModalProps {
+    activity: EnrichedActivity | null;
+    detailedActivity: StravaActivity | null;
+    analysisValues: ActivityAnalysis | null;
+    loadingDetails: boolean;
+    zones: HRZones;
+    onClose: () => void;
+}
+
+const ActivityModal: React.FC<ActivityModalProps> = ({ activity, detailedActivity, analysisValues, loadingDetails, zones, onClose }) => {
     if (!activity) return null;
 
     return (
@@ -50,11 +49,11 @@ const ActivityModal = ({ activity, detailedActivity, analysisValues, loadingDeta
                             </div>
 
                             {/* Zone Distribution Bar */}
-                            {analysisValues.metrics.zones && (
+                            {(analysisValues.metrics as any)?.zones && (
                                 <div className="mt-4">
                                     <h4 className="font-bold text-gray-700 mb-2">Heart Rate Zones</h4>
                                     <div className="flex h-8 rounded-lg overflow-hidden w-full bg-gray-200 text-xs font-bold text-white shadow-inner">
-                                        {Object.entries(analysisValues.metrics.zones.distribution).map(([zone, data]) => {
+                                        {Object.entries((analysisValues.metrics as any).zones.distribution).map(([zone, data]: [string, any]) => {
                                             const pct = parseInt(data.pct);
                                             if (pct === 0) return null;
                                             return (

@@ -1,20 +1,18 @@
 import React from 'react';
-import { Bar } from 'react-chartjs-2';
+import { Chart } from 'react-chartjs-2';
+import type { WeeklyStats } from '../../types';
 
-/**
- * Power vs Heart Rate dual-axis bar/line chart
- * Shows the relationship between weekly average power and heart rate
- * 
- * @param {Object} props
- * @param {string[]} props.labels - Week labels
- * @param {Object[]} props.stats - Weekly stats with avgPower and avgHeartRate
- */
-const PowerHRChart = ({ labels, stats }) => {
+interface PowerHRChartProps {
+    labels: string[];
+    stats: WeeklyStats[];
+}
+
+const PowerHRChart: React.FC<PowerHRChartProps> = ({ labels, stats }) => {
     const data = {
         labels,
         datasets: [
             {
-                type: 'bar',
+                type: 'bar' as const,
                 label: 'Avg Power (Watts)',
                 data: stats.map(week => week.avgPower),
                 backgroundColor: 'rgba(255, 206, 86, 0.5)',
@@ -23,7 +21,7 @@ const PowerHRChart = ({ labels, stats }) => {
                 yAxisID: 'y',
             },
             {
-                type: 'line',
+                type: 'line' as const,
                 label: 'Avg Heart Rate (bpm)',
                 data: stats.map(week => week.avgHeartRate),
                 borderColor: 'rgba(255, 99, 132, 1)',
@@ -35,8 +33,8 @@ const PowerHRChart = ({ labels, stats }) => {
 
     const options = {
         scales: {
-            y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Watts' } },
-            y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'BPM' } },
+            y: { type: 'linear' as const, display: true, position: 'left' as const, title: { display: true, text: 'Watts' } },
+            y1: { type: 'linear' as const, display: true, position: 'right' as const, grid: { drawOnChartArea: false }, title: { display: true, text: 'BPM' } },
         },
     };
 
@@ -57,7 +55,7 @@ const PowerHRChart = ({ labels, stats }) => {
                     </p>
                 </div>
             </div>
-            <Bar data={data} options={options} />
+            <Chart type="bar" data={data} options={options} />
         </div>
     );
 };

@@ -3,11 +3,12 @@ import { getAuthUrl, getToken, getActivities, calculateStats } from './services/
 import Dashboard from './components/Dashboard';
 import WithingsCallback from './components/WithingsCallback';
 import { Activity } from 'lucide-react';
+import type { WeeklyStats } from './types';
 
 function App() {
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState<WeeklyStats[] | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   const dataFetchedRef = React.useRef(false);
 
@@ -60,7 +61,7 @@ function App() {
             localStorage.setItem('strava_refresh_token', tokenData.refresh_token);
           }
           if (tokenData.expires_at) {
-            localStorage.setItem('strava_token_expires', tokenData.expires_at);
+            localStorage.setItem('strava_token_expires', String(tokenData.expires_at));
           }
           const activities = await getActivities(tokenData.access_token);
           const calculatedStats = calculateStats(activities);

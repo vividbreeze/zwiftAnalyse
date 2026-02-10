@@ -1,14 +1,14 @@
 import React from 'react';
 import { TrendingUp, Scale } from 'lucide-react';
 import FormatFeedback from './FormatFeedback';
+import type { OverallProgress, PerformanceMetrics } from '../types';
 
-/**
- * Coach's Assessment component showing overall progress, insights, and recommendations
- * @param {Object} props
- * @param {Object} props.overallProgress - Progress analysis from analyzeOverallProgress
- * @param {Object} props.performanceMetrics - Metrics from calculatePerformanceMetrics
- */
-const CoachAssessment = ({ overallProgress, performanceMetrics }) => {
+interface CoachAssessmentProps {
+    overallProgress: OverallProgress | null;
+    performanceMetrics: PerformanceMetrics | null;
+}
+
+const CoachAssessment: React.FC<CoachAssessmentProps> = ({ overallProgress, performanceMetrics }) => {
     if (!overallProgress) return null;
 
     return (
@@ -47,7 +47,7 @@ const CoachAssessment = ({ overallProgress, performanceMetrics }) => {
             )}
 
             {/* Performance Insights (combined weight + training metrics) */}
-            {performanceMetrics?.performanceInsight?.length > 0 && (
+            {performanceMetrics?.performanceInsight && performanceMetrics.performanceInsight.length > 0 && (
                 <div className="bg-indigo-50/50 p-3 rounded-lg border border-indigo-200 mt-3">
                     <div className="text-indigo-800 font-medium text-sm mb-2">📊 Performance Insights:</div>
                     <div className="flex flex-wrap gap-2">
