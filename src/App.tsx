@@ -1,89 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { getAuthUrl, getToken, getActivities, calculateStats } from './services/strava';
+import React from 'react';
 import Dashboard from './components/Dashboard';
 import WithingsCallback from './components/WithingsCallback';
 import { Activity } from 'lucide-react';
-import type { WeeklyStats } from './types';
+import { useStravaAuth } from './hooks/useStravaAuth';
 
 function App() {
-  const [stats, setStats] = useState<WeeklyStats[] | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const dataFetchedRef = React.useRef(false);
+  const { stats, loading, error, handleLogin } = useStravaAuth();
 
   // Check if we're on the Withings callback route
   const isWithingsCallback = window.location.pathname === '/withings/callback';
-
-  useEffect(() => {
-    // Don't run Strava init if we're handling Withings callback
-    if (isWithingsCallback) return;
-
-    const init = async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code');
-
-      // Check if we already have a stored token
-      const existingToken = localStorage.getItem('strava_access_token');
-
-      if (existingToken && !code) {
-        // Use existing token - no need to re-authorize
-        if (dataFetchedRef.current) return;
-        dataFetchedRef.current = true;
-
-        setLoading(true);
-        try {
-          const activities = await getActivities(existingToken);
-          const calculatedStats = calculateStats(activities);
-          setStats(calculatedStats);
-        } catch (err) {
-          // Token might be expired - clear it and let user re-authorize
-          console.error('Token expired or invalid:', err);
-          localStorage.removeItem('strava_access_token');
-          setError('Session expired. Please reconnect with Strava.');
-        } finally {
-          setLoading(false);
-        }
-        return;
-      }
-
-      // Check for code in URL (callback from Strava)
-      if (code) {
-        if (dataFetchedRef.current) return; // Prevent double execution
-        dataFetchedRef.current = true;
-
-        setLoading(true);
-        try {
-          const tokenData = await getToken(code);
-          localStorage.setItem('strava_access_token', tokenData.access_token);
-          // Also store refresh token and expiry for future token refresh
-          if (tokenData.refresh_token) {
-            localStorage.setItem('strava_refresh_token', tokenData.refresh_token);
-          }
-          if (tokenData.expires_at) {
-            localStorage.setItem('strava_token_expires', String(tokenData.expires_at));
-          }
-          const activities = await getActivities(tokenData.access_token);
-          const calculatedStats = calculateStats(activities);
-          setStats(calculatedStats);
-
-          // Clean URL
-          window.history.replaceState({}, document.title, "/");
-        } catch (err) {
-          setError('Failed to fetch data from Strava.');
-          console.error(err);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    init();
-  }, [isWithingsCallback]);
-
-  const handleLogin = () => {
-    window.location.href = getAuthUrl();
-  };
 
   // Render Withings callback handler if on that route
   if (isWithingsCallback) {
@@ -138,3 +63,4 @@ function App() {
 }
 
 export default App;
+

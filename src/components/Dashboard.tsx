@@ -1,24 +1,34 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { getActivityDetails } from '../services/strava';
-import { analyzeActivity, analyzeOverallProgress, calculatePerformanceMetrics } from '../services/analysis';
-import { isWithingsConnected, getWithingsAuthUrl, getBodyCompositionForChart, getLatestMeasures } from '../services/withings';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
+import React, { useState, useMemo, lazy, Suspense } from 'react';
+import { analyzeOverallProgress, calculatePerformanceMetrics } from '../services/analysis/index';
+// ChartJS registration is now handled in main.tsx
 import { Activity, Clock, TrendingUp, Settings as SettingsIcon, Scale } from 'lucide-react';
-import { calculateZones, userProfile } from '../config/user';
-import Settings, { loadSettings } from './Settings';
-import type { WeeklyStats, EnrichedActivity, StravaActivity, BodyCompositionEntry, LatestWeight, ActivityAnalysis, HRZones } from '../types';
+import { calculateZones } from '../config/user';
+import Settings from './Settings';
+import { useSettings } from '../context/SettingsContext';
+import type { WeeklyStats } from '../types';
+
+// Custom Hooks
+import { useWithings } from '../hooks/useWithings';
+import { useActivityDetails } from '../hooks/useActivityDetails';
 
 // Extracted components
 import CoachAssessment from './CoachAssessment';
 import SummaryCard from './SummaryCard';
 import ActivityModal from './ActivityModal';
 import WeeklyTable from './WeeklyTable';
-import PowerHRChart from './charts/PowerHRChart';
-import EfficiencyChart from './charts/EfficiencyChart';
-import ZonesChart from './charts/ZonesChart';
-import BodyCompChart from './charts/BodyCompChart';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend, Filler);
+// Lazy loaded charts
+const PowerHRChart = lazy(() => import('./charts/PowerHRChart'));
+const EfficiencyChart = lazy(() => import('./charts/EfficiencyChart'));
+const ZonesChart = lazy(() => import('./charts/ZonesChart'));
+const BodyCompChart = lazy(() => import('./charts/BodyCompChart'));
+
+// Loading skeleton for charts
+const ChartSkeleton = () => (
+    <div className="bg-white p-4 rounded-xl shadow-md h-[300px] flex items-center justify-center animate-pulse">
+        <div className="w-8 h-8 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+    </div>
+);
 
 /**
  * Main Dashboard component
@@ -33,79 +43,38 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ stats }) => {
     const [expandedWeeks, setExpandedWeeks] = useState<Record<number, boolean>>({});
-    const [selectedActivity, setSelectedActivity] = useState<EnrichedActivity | null>(null);
-    const [detailedActivity, setDetailedActivity] = useState<StravaActivity | null>(null);
-    const [loadingDetails, setLoadingDetails] = useState(false);
-    const [analysisValues, setAnalysisValues] = useState<ActivityAnalysis | null>(null);
     const [settingsOpen, setSettingsOpen] = useState(false);
 
-    // Withings state
-    const [withingsConnected, setWithingsConnected] = useState(false);
-    const [bodyComposition, setBodyComposition] = useState<BodyCompositionEntry[]>([]);
-    const [latestWeight, setLatestWeight] = useState<LatestWeight | null>(null);
-    const [loadingWithings, setLoadingWithings] = useState(false);
+    // Get settings from context
+    const { settings } = useSettings();
 
-    const zones = calculateZones(userProfile.maxHr, userProfile.restingHr);
+    // Custom Hooks
+    const {
+        connected: withingsConnected,
+        bodyComposition,
+        latestWeight,
+        connect: connectWithings
+    } = useWithings();
+
+    const {
+        selectedActivity,
+        detailedActivity,
+        analysisValues,
+        loading: loadingDetails,
+        selectActivity,
+        clearSelection
+    } = useActivityDetails(stats);
+
+    // Calculate zones based on settings from Context
+    const zones = useMemo(() => calculateZones(settings.maxHr, settings.restingHr), [settings.maxHr, settings.restingHr]);
     const labels = stats.map(week => week.label);
-
-    // Load Withings data on mount
-    useEffect(() => {
-        const loadWithingsData = async () => {
-            const connected = isWithingsConnected();
-            setWithingsConnected(connected);
-
-            if (connected) {
-                setLoadingWithings(true);
-                try {
-                    const [compositionData, latest] = await Promise.all([
-                        getBodyCompositionForChart(),
-                        getLatestMeasures()
-                    ]);
-                    setBodyComposition(compositionData);
-                    setLatestWeight(latest);
-                } catch (error) {
-                    console.error('Error loading Withings data:', error);
-                }
-                setLoadingWithings(false);
-            }
-        };
-        loadWithingsData();
-    }, []);
 
     /** Connect to Withings OAuth */
     const handleWithingsConnect = () => {
-        const settings = loadSettings();
-        if (!settings.withingsClientId || !settings.withingsClientSecret) {
+        connectWithings(() => {
             alert('Bitte zuerst Withings Client ID & Secret in den Settings eingeben.');
             setSettingsOpen(true);
-            return;
-        }
-        const authUrl = getWithingsAuthUrl();
-        if (authUrl) {
-            window.location.href = authUrl;
-        }
-    };
-
-    /** Fetch and analyze activity details */
-    const handleActivityClick = async (activity: EnrichedActivity) => {
-        setSelectedActivity(activity);
-        setDetailedActivity(null);
-        setAnalysisValues(null);
-        setLoadingDetails(true);
-        try {
-            const token = localStorage.getItem('strava_access_token');
-            if (token) {
-                const details = await getActivityDetails(token, activity.id);
-                setDetailedActivity(details);
-                if (details?.laps) {
-                    setAnalysisValues(analyzeActivity(activity, details.laps, stats));
-                }
-            }
-        } catch (error) {
-            console.error('Failed to fetch details', error);
-        } finally {
-            setLoadingDetails(false);
-        }
+        });
     };
 
     const toggleWeek = (index: number) => {
@@ -188,11 +157,19 @@ const Dashboard: React.FC<DashboardProps> = ({ stats }) => {
 
             {/* Charts Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <PowerHRChart labels={labels} stats={stats} />
-                <EfficiencyChart labels={labels} stats={stats} />
-                <ZonesChart labels={labels} stats={stats} zones={zones} />
+                <Suspense fallback={<ChartSkeleton />}>
+                    <PowerHRChart labels={labels} stats={stats} />
+                </Suspense>
+                <Suspense fallback={<ChartSkeleton />}>
+                    <EfficiencyChart labels={labels} stats={stats} />
+                </Suspense>
+                <Suspense fallback={<ChartSkeleton />}>
+                    <ZonesChart labels={labels} stats={stats} zones={zones} />
+                </Suspense>
                 {withingsConnected && bodyComposition.length > 0 && (
-                    <BodyCompChart labels={labels} bodyComposition={bodyComposition} />
+                    <Suspense fallback={<ChartSkeleton />}>
+                        <BodyCompChart labels={labels} bodyComposition={bodyComposition} />
+                    </Suspense>
                 )}
             </div>
 
@@ -201,7 +178,7 @@ const Dashboard: React.FC<DashboardProps> = ({ stats }) => {
                 stats={stats}
                 expandedWeeks={expandedWeeks}
                 onToggleWeek={toggleWeek}
-                onActivityClick={handleActivityClick}
+                onActivityClick={selectActivity}
             />
 
             {/* Activity Detail Modal */}
@@ -211,7 +188,7 @@ const Dashboard: React.FC<DashboardProps> = ({ stats }) => {
                 analysisValues={analysisValues}
                 loadingDetails={loadingDetails}
                 zones={zones}
-                onClose={() => setSelectedActivity(null)}
+                onClose={clearSelection}
             />
 
             {/* Footer Legend */}

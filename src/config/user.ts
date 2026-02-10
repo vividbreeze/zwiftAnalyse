@@ -1,4 +1,4 @@
-import { loadSettings } from '../components/Settings';
+import { loadSettings } from '../components/settings/utils';
 import type { AppSettings, HRZones, ZoneName } from '../types';
 
 /**

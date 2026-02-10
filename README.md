@@ -2,7 +2,7 @@
 
 A personal training analysis dashboard that combines **Strava** activity data with **Withings** body composition tracking to provide intelligent coaching insights.
 
-![Dashboard](https://img.shields.io/badge/React-19-blue) ![Vite](https://img.shields.io/badge/Vite-7-purple) ![Tests](https://img.shields.io/badge/Tests-13%20passing-green)
+![Dashboard](https://img.shields.io/badge/React-19-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue) ![Vite](https://img.shields.io/badge/Vite-6-purple) ![Tests](https://img.shields.io/badge/Tests-65%20passing-green) ![Coverage](https://img.shields.io/badge/Coverage-67%25-yellow)
 
 ## Features
 
@@ -51,15 +51,20 @@ Withings credentials are entered through the app's Settings UI (⚙️ button):
 
 ## Development
 
+This project uses **TypeScript** for type safety and **Vitest** for testing.
+
 ```bash
 # Start dev server
 npm run dev
 
-# Run tests
+# Run all tests
 npm test
 
-# Run tests once
-npm run test:run
+# Run tests with coverage report
+npm test -- --coverage
+
+# Type checking
+npm run typecheck
 
 # Lint code
 npm run lint
@@ -73,20 +78,20 @@ npm run build
 ```
 src/
 ├── components/
-│   ├── Dashboard.jsx      # Main dashboard with charts
-│   ├── CoachAssessment.jsx # AI coaching insights
-│   ├── SummaryCard.jsx    # Metric display cards
-│   ├── FormatFeedback.jsx # Text formatting helper
-│   ├── Settings.jsx       # API configuration
-│   └── WithingsCallback.jsx
+│   ├── Dashboard.tsx      # Main dashboard with charts
+│   ├── ActivityModal.tsx  # Detailed activity view
+│   ├── CoachAssessment.tsx # AI coaching insights
+│   ├── SummaryCard.tsx    # Metric display cards
+│   ├── FormatFeedback.tsx # Text formatting helper
+│   ├── Settings.tsx       # API configuration
+│   └── WeeklyTable.tsx    # Training log table
 ├── services/
-│   ├── analysis.js        # Training analysis functions
-│   ├── strava.js          # Strava API integration
-│   └── withings.js        # Withings API integration
+│   ├── analysis.ts        # Training analysis functions
+│   ├── strava.ts          # Strava API integration
+│   └── withings.ts        # Withings API integration
 ├── config/
-│   └── user.js            # User profile & HR zones
-└── test/
-    └── setup.js           # Test configuration
+│   └── user.ts            # User profile & HR zones
+└── types.ts               # TypeScript interfaces & types
 ```
 
 ## Key Metrics
@@ -99,8 +104,8 @@ src/
 
 ## Tech Stack
 
-- **Frontend**: React 19, Chart.js, TailwindCSS
-- **Build**: Vite 7
+- **Frontend**: React 19, TypeScript, Chart.js, TailwindCSS
+- **Build**: Vite
 - **Testing**: Vitest, React Testing Library
 - **APIs**: Strava OAuth, Withings OAuth
 

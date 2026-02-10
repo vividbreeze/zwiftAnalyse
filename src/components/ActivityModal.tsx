@@ -18,12 +18,12 @@ const ActivityModal: React.FC<ActivityModalProps> = ({ activity, detailedActivit
     if (!activity) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" data-testid="activity-modal">
             <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 border-b sticky top-0 bg-white z-10">
                     <h2 className="text-2xl font-bold text-gray-800">{activity.name}</h2>
-                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
+                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full" data-testid="close-modal">
                         <X size={24} />
                     </button>
                 </div>
@@ -34,7 +34,7 @@ const ActivityModal: React.FC<ActivityModalProps> = ({ activity, detailedActivit
                         <SummaryCard title="Avg Power" value={`${activity.average_watts?.toFixed(0) || 0} W`} icon={<Activity className="w-5 h-5 text-yellow-500" />} />
                         <SummaryCard title="Avg HR" value={`${activity.average_heartrate?.toFixed(0) || 0} bpm`} icon={<Activity className="w-5 h-5 text-red-500" />} />
                         <SummaryCard title="Calories" value={`${activity.totalCalories} kcal`} icon={<TrendingUp className="w-5 h-5 text-blue-600" />} />
-                        <SummaryCard title="Efficiency" value={activity.efficiencyFactor} icon={<TrendingUp className="w-5 h-5 text-teal-500" />} />
+                        <SummaryCard title="Efficiency" value={`${activity.efficiencyFactor}`} icon={<TrendingUp className="w-5 h-5 text-teal-500" />} />
                     </div>
 
                     {/* Coach's Feedback */}
@@ -44,7 +44,7 @@ const ActivityModal: React.FC<ActivityModalProps> = ({ activity, detailedActivit
                                 <TrendingUp className="w-5 h-5 mr-2" />
                                 Coach&apos;s Feedback
                             </h3>
-                            <div className="prose prose-sm max-w-none">
+                            <div className="prose prose-sm max-w-none" data-testid="coach-feedback">
                                 <FormatFeedback text={analysisValues.feedback} />
                             </div>
 
@@ -75,7 +75,7 @@ const ActivityModal: React.FC<ActivityModalProps> = ({ activity, detailedActivit
 
                     {/* Laps / Intervals Table */}
                     {loadingDetails ? (
-                        <div className="flex justify-center py-8">
+                        <div className="flex justify-center py-8" data-testid="loading-spinner">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
                         </div>
                     ) : detailedActivity?.laps && detailedActivity.laps.length > 0 ? (

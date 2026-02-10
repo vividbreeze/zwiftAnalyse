@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { loadSettings, saveSettings } from '../components/Settings';
+import { loadSettings, saveSettings } from '../components/settings/utils';
 import type { WithingsTokenData, BodyCompositionEntry, LatestWeight } from '../types';
 
 interface WithingsCredentials {
