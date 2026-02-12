@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workout_file>
+  <author>Training App</author>
+  <name>Sweet Spot - Low Cadence Power</name>
+  <description>3x15min @ 90% FTP mit niedriger Kadenz (70-80) für Kraftaufbau</description>
+  <sportType>bike</sportType>
+  <tags>
+    <tag name="Sweet Spot"/>
+  </tags>
+  <workout>
+    <Warmup Duration="720" PowerLow="0.55" PowerHigh="0.7" Cadence="85" CadenceResting="90">
+      <textevent timeoffset="0" message="Aufwärmen"/>
+    </Warmup>
+    <SteadyState Duration="900" Power="0.9" Cadence="70" CadenceResting="80">
+      <textevent timeoffset="0" message="Sweet Spot - niedrige Kadenz, hohe Kraft"/>
+    </SteadyState>
+    <SteadyState Duration="180" Power="0.55" Cadence="85" CadenceResting="95">
+      <textevent timeoffset="0" message="Beine lockern - hohe Kadenz"/>
+    </SteadyState>
+    <SteadyState Duration="900" Power="0.9" Cadence="70" CadenceResting="80">
+      <textevent timeoffset="0" message="Sweet Spot - Kraft"/>
+    </SteadyState>
+    <SteadyState Duration="180" Power="0.55" Cadence="85" CadenceResting="95">
+      <textevent timeoffset="0" message="Beine lockern"/>
+    </SteadyState>
+    <SteadyState Duration="900" Power="0.9" Cadence="70" CadenceResting="80">
+      <textevent timeoffset="0" message="Sweet Spot - letzter Kraft-Block"/>
+    </SteadyState>
+    <Cooldown Duration="420" PowerLow="0.7" PowerHigh="0.5" Cadence="85">
+      <textevent timeoffset="0" message="Abkühlen"/>
+    </Cooldown>
+  </workout>
+</workout_file>

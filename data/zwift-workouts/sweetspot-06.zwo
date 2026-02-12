@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workout_file>
+  <author>Training App</author>
+  <name>Sweet Spot - Cadence Variations</name>
+  <description>3x16min @ 89% FTP mit Kadenz-Wechsel alle 4min (85→95→105→95)</description>
+  <sportType>bike</sportType>
+  <tags>
+    <tag name="Sweet Spot"/>
+  </tags>
+  <workout>
+    <Warmup Duration="720" PowerLow="0.55" PowerHigh="0.7" Cadence="90" CadenceResting="95">
+      <textevent timeoffset="0" message="Aufwärmen"/>
+    </Warmup>
+    <SteadyState Duration="240" Power="0.89" Cadence="85" CadenceResting="87">
+      <textevent timeoffset="0" message="Niedrige Kadenz"/>
+    </SteadyState>
+    <SteadyState Duration="240" Power="0.89" Cadence="93" CadenceResting="97">
+      <textevent timeoffset="0" message="Mittlere Kadenz"/>
+    </SteadyState>
+    <SteadyState Duration="240" Power="0.89" Cadence="103" CadenceResting="107">
+      <textevent timeoffset="0" message="Hohe Kadenz"/>
+    </SteadyState>
+    <SteadyState Duration="240" Power="0.89" Cadence="93" CadenceResting="97">
+      <textevent timeoffset="0" message="Zurück zu mittel"/>
+    </SteadyState>
+    <SteadyState Duration="240" Power="0.55" Cadence="85">
+      <textevent timeoffset="0" message="Pause"/>
+    </SteadyState>
+    <SteadyState Duration="240" Power="0.89" Cadence="85" CadenceResting="87">
+      <textevent timeoffset="0" message="Niedrige Kadenz"/>
+    </SteadyState>
+    <SteadyState Duration="240" Power="0.89" Cadence="93" CadenceResting="97">
+      <textevent timeoffset="0" message="Mittlere Kadenz"/>
+    </SteadyState>
+    <SteadyState Duration="240" Power="0.89" Cadence="103" CadenceResting="107">
+      <textevent timeoffset="0" message="Hohe Kadenz"/>
+    </SteadyState>
+    <SteadyState Duration="240" Power="0.89" Cadence="93" CadenceResting="97">
+      <textevent timeoffset="0" message="Zurück zu mittel"/>
+    </SteadyState>
+    <SteadyState Duration="240" Power="0.55" Cadence="85">
+      <textevent timeoffset="0" message="Pause"/>
+    </SteadyState>
+    <SteadyState Duration="240" Power="0.89" Cadence="85" CadenceResting="87">
+      <textevent timeoffset="0" message="Niedrige Kadenz"/>
+    </SteadyState>
+    <SteadyState Duration="240" Power="0.89" Cadence="93" CadenceResting="97">
+      <textevent timeoffset="0" message="Mittlere Kadenz"/>
+    </SteadyState>
+    <SteadyState Duration="240" Power="0.89" Cadence="103" CadenceResting="107">
+      <textevent timeoffset="0" message="Hohe Kadenz"/>
+    </SteadyState>
+    <SteadyState Duration="240" Power="0.89" Cadence="93" CadenceResting="97">
+      <textevent timeoffset="0" message="Finish mittel!"/>
+    </SteadyState>
+    <Cooldown Duration="480" PowerLow="0.7" PowerHigh="0.5" Cadence="85">
+      <textevent timeoffset="0" message="Abkühlen"/>
+    </Cooldown>
+  </workout>
+</workout_file>

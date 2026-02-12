@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workout_file>
+  <author>Training App</author>
+  <name>FTP Builder - Threshold Ladder</name>
+  <description>Ladder: 5-6-7-8-7-6-5min @ 94% FTP</description>
+  <sportType>bike</sportType>
+  <tags>
+    <tag name="FTP Builder"/>
+  </tags>
+  <workout>
+    <Warmup Duration="900" PowerLow="0.55" PowerHigh="0.75" Cadence="90" CadenceResting="95">
+      <textevent timeoffset="0" message="Aufwärmen"/>
+    </Warmup>
+    <SteadyState Duration="300" Power="0.94" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="5min"/>
+    </SteadyState>
+    <SteadyState Duration="120" Power="0.55" Cadence="85">
+      <textevent timeoffset="0" message="Pause"/>
+    </SteadyState>
+    <SteadyState Duration="360" Power="0.94" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="6min"/>
+    </SteadyState>
+    <SteadyState Duration="120" Power="0.55" Cadence="85">
+      <textevent timeoffset="0" message="Pause"/>
+    </SteadyState>
+    <SteadyState Duration="420" Power="0.94" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="7min"/>
+    </SteadyState>
+    <SteadyState Duration="120" Power="0.55" Cadence="85">
+      <textevent timeoffset="0" message="Pause"/>
+    </SteadyState>
+    <SteadyState Duration="480" Power="0.94" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="8min - Peak!"/>
+    </SteadyState>
+    <SteadyState Duration="120" Power="0.55" Cadence="85">
+      <textevent timeoffset="0" message="Pause"/>
+    </SteadyState>
+    <SteadyState Duration="420" Power="0.94" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="7min - absteigend"/>
+    </SteadyState>
+    <SteadyState Duration="120" Power="0.55" Cadence="85">
+      <textevent timeoffset="0" message="Pause"/>
+    </SteadyState>
+    <SteadyState Duration="360" Power="0.94" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="6min"/>
+    </SteadyState>
+    <SteadyState Duration="120" Power="0.55" Cadence="85">
+      <textevent timeoffset="0" message="Pause"/>
+    </SteadyState>
+    <SteadyState Duration="300" Power="0.94" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="5min - Finish stark!"/>
+    </SteadyState>
+    <Cooldown Duration="360" PowerLow="0.7" PowerHigh="0.5" Cadence="85">
+      <textevent timeoffset="0" message="Abkühlen"/>
+    </Cooldown>
+  </workout>
+</workout_file>

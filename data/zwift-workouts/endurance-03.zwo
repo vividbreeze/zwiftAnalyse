@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workout_file>
+  <author>Training App</author>
+  <name>Endurance - Tempo Bursts</name>
+  <description>Zone 2 mit kurzen Tempo-Bursts für Abwechslung</description>
+  <sportType>bike</sportType>
+  <tags>
+    <tag name="Endurance"/>
+  </tags>
+  <workout>
+    <Warmup Duration="900" PowerLow="0.55" PowerHigh="0.68" Cadence="85" CadenceResting="90">
+      <textevent timeoffset="0" message="Aufwärmen"/>
+    </Warmup>
+    <SteadyState Duration="600" Power="0.68" Cadence="85" CadenceResting="92">
+      <textevent timeoffset="0" message="Zone 2"/>
+    </SteadyState>
+    <SteadyState Duration="60" Power="0.85" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="Tempo Burst!"/>
+    </SteadyState>
+    <SteadyState Duration="540" Power="0.68" Cadence="85" CadenceResting="92">
+      <textevent timeoffset="0" message="Zurück zu Zone 2"/>
+    </SteadyState>
+    <SteadyState Duration="60" Power="0.85" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="Tempo Burst!"/>
+    </SteadyState>
+    <SteadyState Duration="540" Power="0.68" Cadence="85" CadenceResting="92">
+      <textevent timeoffset="0" message="Zone 2"/>
+    </SteadyState>
+    <SteadyState Duration="60" Power="0.85" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="Tempo Burst!"/>
+    </SteadyState>
+    <SteadyState Duration="540" Power="0.68" Cadence="85" CadenceResting="92">
+      <textevent timeoffset="0" message="Zone 2"/>
+    </SteadyState>
+    <SteadyState Duration="60" Power="0.85" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="Tempo Burst!"/>
+    </SteadyState>
+    <SteadyState Duration="540" Power="0.68" Cadence="85" CadenceResting="92">
+      <textevent timeoffset="0" message="Zone 2 - Finish"/>
+    </SteadyState>
+    <Cooldown Duration="600" PowerLow="0.68" PowerHigh="0.55" Cadence="85">
+      <textevent timeoffset="0" message="Ausklingen"/>
+    </Cooldown>
+  </workout>
+</workout_file>

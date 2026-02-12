@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workout_file>
+  <author>Training App</author>
+  <name>VO2max - Tabata Style</name>
+  <description>20sec @ 125% / 10sec @ 40% - 8 Wiederholungen x 3 Serien</description>
+  <sportType>bike</sportType>
+  <tags>
+    <tag name="VO2max"/>
+  </tags>
+  <workout>
+    <Warmup Duration="720" PowerLow="0.55" PowerHigh="0.75" Cadence="90" CadenceResting="95">
+      <textevent timeoffset="0" message="Aufwärmen"/>
+    </Warmup>
+    <SteadyState Duration="20" Power="1.25" Cadence="100" CadenceResting="110">
+      <textevent timeoffset="0" message="All Out!"/>
+    </SteadyState>
+    <SteadyState Duration="10" Power="0.4" Cadence="85">
+      <textevent timeoffset="0" message="Mini-Pause"/>
+    </SteadyState>
+    <SteadyState Duration="20" Power="1.25" Cadence="100" CadenceResting="110">
+      <textevent timeoffset="0" message="All Out!"/>
+    </SteadyState>
+    <SteadyState Duration="10" Power="0.4" Cadence="85">
+      <textevent timeoffset="0" message="Mini-Pause"/>
+    </SteadyState>
+    <SteadyState Duration="20" Power="1.25" Cadence="100" CadenceResting="110">
+      <textevent timeoffset="0" message="All Out!"/>
+    </SteadyState>
+    <SteadyState Duration="10" Power="0.4" Cadence="85">
+      <textevent timeoffset="0" message="Mini-Pause"/>
+    </SteadyState>
+    <SteadyState Duration="20" Power="1.25" Cadence="100" CadenceResting="110">
+      <textevent timeoffset="0" message="All Out!"/>
+    </SteadyState>
+    <SteadyState Duration="10" Power="0.4" Cadence="85">
+      <textevent timeoffset="0" message="Mini-Pause"/>
+    </SteadyState>
+    <SteadyState Duration="20" Power="1.25" Cadence="100" CadenceResting="110">
+      <textevent timeoffset="0" message="All Out!"/>
+    </SteadyState>
+    <SteadyState Duration="10" Power="0.4" Cadence="85">
+      <textevent timeoffset="0" message="Mini-Pause"/>
+    </SteadyState>
+    <SteadyState Duration="20" Power="1.25" Cadence="100" CadenceResting="110">
+      <textevent timeoffset="0" message="All Out!"/>
+    </SteadyState>
+    <SteadyState Duration="10" Power="0.4" Cadence="85">
+      <textevent timeoffset="0" message="Mini-Pause"/>
+    </SteadyState>
+    <SteadyState Duration="20" Power="1.25" Cadence="100" CadenceResting="110">
+      <textevent timeoffset="0" message="All Out!"/>
+    </SteadyState>
+    <SteadyState Duration="10" Power="0.4" Cadence="85">
+      <textevent timeoffset="0" message="Mini-Pause"/>
+    </SteadyState>
+    <SteadyState Duration="20" Power="1.25" Cadence="100" CadenceResting="110">
+      <textevent timeoffset="0" message="All Out!"/>
+    </SteadyState>
+    <SteadyState Duration="240" Power="0.55" Cadence="85">
+      <textevent timeoffset="0" message="4min Erholung"/>
+    </SteadyState>
+    <SteadyState Duration="20" Power="1.25" Cadence="100" CadenceResting="110">
+      <textevent timeoffset="0" message="All Out!"/>
+    </SteadyState>
+    <SteadyState Duration="10" Power="0.4" Cadence="85">
+      <textevent timeoffset="0" message="Mini-Pause"/>
+    </SteadyState>
+    <SteadyState Duration="20" Power="1.25" Cadence="100" CadenceResting="110">
+      <textevent timeoffset="0" message="All Out!"/>
+    </SteadyState>
+    <SteadyState Duration="10" Power="0.4" Cadence="85">
+      <textevent timeoffset="0" message="Mini-Pause"/>
+    </SteadyState>
+    <SteadyState Duration="20" Power="1.25" Cadence="100" CadenceResting="110">
+      <textevent timeoffset="0" message="All Out!"/>
+    </SteadyState>
+    <SteadyState Duration="10" Power="0.4" Cadence="85">
+      <textevent timeoffset="0" message="Mini-Pause"/>
+    </SteadyState>
+    <SteadyState Duration="20" Power="1.25" Cadence="100" CadenceResting="110">
+      <textevent timeoffset="0" message="All Out!"/>
+    </SteadyState>
+    <SteadyState Duration="10" Power="0.4" Cadence="85">
+      <textevent timeoffset="0" message="Mini-Pause"/>
+    </SteadyState>
+    <SteadyState Duration="20" Power="1.25" Cadence="100" CadenceResting="110">
+      <textevent timeoffset="0" message="All Out!"/>
+    </SteadyState>
+    <SteadyState Duration="10" Power="0.4" Cadence="85">
+      <textevent timeoffset="0" message="Mini-Pause"/>
+    </SteadyState>
+    <SteadyState Duration="20" Power="1.25" Cadence="100" CadenceResting="110">
+      <textevent timeoffset="0" message="All Out!"/>
+    </SteadyState>
+    <SteadyState Duration="10" Power="0.4" Cadence="85">
+      <textevent timeoffset="0" message="Mini-Pause"/>
+    </SteadyState>
+    <SteadyState Duration="20" Power="1.25" Cadence="100" CadenceResting="110">
+      <textevent timeoffset="0" message="All Out!"/>
+    </SteadyState>
+    <SteadyState Duration="10" Power="0.4" Cadence="85">
+      <textevent timeoffset="0" message="Mini-Pause"/>
+    </SteadyState>
+    <SteadyState Duration="20" Power="1.25" Cadence="100" CadenceResting="110">
+      <textevent timeoffset="0" message="All Out!"/>
+    </SteadyState>
+    <Cooldown Duration="600" PowerLow="0.7" PowerHigh="0.5" Cadence="85">
+      <textevent timeoffset="0" message="Gut abkühlen"/>
+    </Cooldown>
+  </workout>
+</workout_file>

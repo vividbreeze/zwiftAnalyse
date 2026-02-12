@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workout_file>
+  <author>Training App</author>
+  <name>FTP Builder - Threshold Bursts</name>
+  <description>3x12min @ 95% FTP mit kurzen Bursts auf 110%</description>
+  <sportType>bike</sportType>
+  <tags>
+    <tag name="FTP Builder"/>
+  </tags>
+  <workout>
+    <Warmup Duration="600" PowerLow="0.55" PowerHigh="0.7" Cadence="90" CadenceResting="95">
+      <textevent timeoffset="0" message="Aufwärmen"/>
+    </Warmup>
+    <SteadyState Duration="300" Power="0.95" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="5min Threshold"/>
+    </SteadyState>
+    <SteadyState Duration="30" Power="1.1" Cadence="95" CadenceResting="100">
+      <textevent timeoffset="0" message="Burst!"/>
+    </SteadyState>
+    <SteadyState Duration="270" Power="0.95" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="Zurück zu Threshold"/>
+    </SteadyState>
+    <SteadyState Duration="30" Power="1.1" Cadence="95" CadenceResting="100">
+      <textevent timeoffset="0" message="Burst!"/>
+    </SteadyState>
+    <SteadyState Duration="90" Power="0.95" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="Finish stark"/>
+    </SteadyState>
+    <SteadyState Duration="240" Power="0.55" Cadence="85">
+      <textevent timeoffset="0" message="Erholen"/>
+    </SteadyState>
+    <SteadyState Duration="300" Power="0.95" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="5min Threshold"/>
+    </SteadyState>
+    <SteadyState Duration="30" Power="1.1" Cadence="95" CadenceResting="100">
+      <textevent timeoffset="0" message="Burst!"/>
+    </SteadyState>
+    <SteadyState Duration="270" Power="0.95" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="Zurück zu Threshold"/>
+    </SteadyState>
+    <SteadyState Duration="30" Power="1.1" Cadence="95" CadenceResting="100">
+      <textevent timeoffset="0" message="Burst!"/>
+    </SteadyState>
+    <SteadyState Duration="90" Power="0.95" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="Finish stark"/>
+    </SteadyState>
+    <SteadyState Duration="240" Power="0.55" Cadence="85">
+      <textevent timeoffset="0" message="Erholen"/>
+    </SteadyState>
+    <SteadyState Duration="300" Power="0.95" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="5min Threshold"/>
+    </SteadyState>
+    <SteadyState Duration="30" Power="1.1" Cadence="95" CadenceResting="100">
+      <textevent timeoffset="0" message="Burst!"/>
+    </SteadyState>
+    <SteadyState Duration="270" Power="0.95" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="Zurück zu Threshold"/>
+    </SteadyState>
+    <SteadyState Duration="30" Power="1.1" Cadence="95" CadenceResting="100">
+      <textevent timeoffset="0" message="Burst!"/>
+    </SteadyState>
+    <SteadyState Duration="90" Power="0.95" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="Letzter Push!"/>
+    </SteadyState>
+    <Cooldown Duration="480" PowerLow="0.7" PowerHigh="0.5" Cadence="85">
+      <textevent timeoffset="0" message="Abkühlen"/>
+    </Cooldown>
+  </workout>
+</workout_file>

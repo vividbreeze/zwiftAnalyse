@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workout_file>
+  <author>Training App</author>
+  <name>VO2max - Descending Intervals</name>
+  <description>Absteigende Intervalle: 5-4-3-2-1min @ 110-120% FTP</description>
+  <sportType>bike</sportType>
+  <tags>
+    <tag name="VO2max"/>
+  </tags>
+  <workout>
+    <Warmup Duration="900" PowerLow="0.55" PowerHigh="0.75" Cadence="90" CadenceResting="95">
+      <textevent timeoffset="0" message="Gutes Aufwärmen"/>
+    </Warmup>
+    <SteadyState Duration="300" Power="1.1" Cadence="95" CadenceResting="102">
+      <textevent timeoffset="0" message="5min @ 110%"/>
+    </SteadyState>
+    <SteadyState Duration="240" Power="0.5" Cadence="85">
+      <textevent timeoffset="0" message="4min Erholung"/>
+    </SteadyState>
+    <SteadyState Duration="240" Power="1.12" Cadence="95" CadenceResting="105">
+      <textevent timeoffset="0" message="4min @ 112%"/>
+    </SteadyState>
+    <SteadyState Duration="180" Power="0.5" Cadence="85">
+      <textevent timeoffset="0" message="3min Erholung"/>
+    </SteadyState>
+    <SteadyState Duration="180" Power="1.15" Cadence="98" CadenceResting="108">
+      <textevent timeoffset="0" message="3min @ 115%"/>
+    </SteadyState>
+    <SteadyState Duration="120" Power="0.5" Cadence="85">
+      <textevent timeoffset="0" message="2min Erholung"/>
+    </SteadyState>
+    <SteadyState Duration="120" Power="1.18" Cadence="100" CadenceResting="110">
+      <textevent timeoffset="0" message="2min @ 118%"/>
+    </SteadyState>
+    <SteadyState Duration="60" Power="0.5" Cadence="85">
+      <textevent timeoffset="0" message="1min Erholung"/>
+    </SteadyState>
+    <SteadyState Duration="60" Power="1.2" Cadence="102" CadenceResting="112">
+      <textevent timeoffset="0" message="1min @ 120% - All Out!"/>
+    </SteadyState>
+    <Cooldown Duration="600" PowerLow="0.7" PowerHigh="0.5" Cadence="85">
+      <textevent timeoffset="0" message="Gut abkühlen"/>
+    </Cooldown>
+  </workout>
+</workout_file>

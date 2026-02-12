@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workout_file>
+  <author>Training App</author>
+  <name>All-Rounder - Complete Package</name>
+  <description>Kombiniert: Endurance, Sweet Spot, Threshold & VO2max</description>
+  <sportType>bike</sportType>
+  <tags>
+    <tag name="Mixed"/>
+  </tags>
+  <workout>
+    <Warmup Duration="900" PowerLow="0.55" PowerHigh="0.7" Cadence="90" CadenceResting="95">
+      <textevent timeoffset="0" message="Aufwärmen"/>
+    </Warmup>
+    <SteadyState Duration="600" Power="0.7" Cadence="88" CadenceResting="92">
+      <textevent timeoffset="0" message="10min Endurance Base"/>
+    </SteadyState>
+    <SteadyState Duration="600" Power="0.88" Cadence="90" CadenceResting="95">
+      <textevent timeoffset="0" message="10min Sweet Spot"/>
+    </SteadyState>
+    <SteadyState Duration="180" Power="0.6" Cadence="85">
+      <textevent timeoffset="0" message="Kurze Pause"/>
+    </SteadyState>
+    <SteadyState Duration="480" Power="0.95" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="8min Threshold"/>
+    </SteadyState>
+    <SteadyState Duration="240" Power="0.55" Cadence="85">
+      <textevent timeoffset="0" message="Erholen"/>
+    </SteadyState>
+    <SteadyState Duration="180" Power="1.15" Cadence="95" CadenceResting="105">
+      <textevent timeoffset="0" message="3min VO2max"/>
+    </SteadyState>
+    <SteadyState Duration="180" Power="0.5" Cadence="85">
+      <textevent timeoffset="0" message="Gut erholen"/>
+    </SteadyState>
+    <SteadyState Duration="180" Power="1.15" Cadence="95" CadenceResting="105">
+      <textevent timeoffset="0" message="3min VO2max"/>
+    </SteadyState>
+    <SteadyState Duration="180" Power="0.5" Cadence="85">
+      <textevent timeoffset="0" message="Erholen"/>
+    </SteadyState>
+    <SteadyState Duration="180" Power="1.15" Cadence="95" CadenceResting="105">
+      <textevent timeoffset="0" message="3min VO2max - letzter Push!"/>
+    </SteadyState>
+    <Cooldown Duration="600" PowerLow="0.7" PowerHigh="0.5" Cadence="85">
+      <textevent timeoffset="0" message="Abkühlen"/>
+    </Cooldown>
+  </workout>
+</workout_file>

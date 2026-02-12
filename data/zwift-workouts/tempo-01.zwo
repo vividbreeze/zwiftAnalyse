@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workout_file>
+  <author>Training App</author>
+  <name>Tempo - Steady Build</name>
+  <description>3x12min @ 90% FTP - Tempo-Ausdauer aufbauen</description>
+  <sportType>bike</sportType>
+  <tags>
+    <tag name="Tempo"/>
+  </tags>
+  <workout>
+    <Warmup Duration="720" PowerLow="0.55" PowerHigh="0.7" Cadence="90" CadenceResting="95">
+      <textevent timeoffset="0" message="Aufwärmen"/>
+    </Warmup>
+    <SteadyState Duration="720" Power="0.9" Cadence="90" CadenceResting="95">
+      <textevent timeoffset="0" message="12min Tempo"/>
+    </SteadyState>
+    <SteadyState Duration="180" Power="0.55" Cadence="85">
+      <textevent timeoffset="0" message="Kurze Pause"/>
+    </SteadyState>
+    <SteadyState Duration="720" Power="0.9" Cadence="90" CadenceResting="95">
+      <textevent timeoffset="0" message="12min Tempo"/>
+    </SteadyState>
+    <SteadyState Duration="180" Power="0.55" Cadence="85">
+      <textevent timeoffset="0" message="Kurze Pause"/>
+    </SteadyState>
+    <SteadyState Duration="720" Power="0.9" Cadence="90" CadenceResting="95">
+      <textevent timeoffset="0" message="12min Tempo"/>
+    </SteadyState>
+    <Cooldown Duration="360" PowerLow="0.7" PowerHigh="0.5" Cadence="85">
+      <textevent timeoffset="0" message="Abkühlen"/>
+    </Cooldown>
+  </workout>
+</workout_file>

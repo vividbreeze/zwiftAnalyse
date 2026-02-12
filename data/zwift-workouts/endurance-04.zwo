@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workout_file>
+  <author>Training App</author>
+  <name>Endurance - Extended Base</name>
+  <description>2 Stunden Grundlagenausdauer @ 70% FTP</description>
+  <sportType>bike</sportType>
+  <tags>
+    <tag name="Endurance"/>
+  </tags>
+  <workout>
+    <Warmup Duration="900" PowerLow="0.55" PowerHigh="0.7" Cadence="85" CadenceResting="90">
+      <textevent timeoffset="0" message="Langsam warm werden"/>
+    </Warmup>
+    <SteadyState Duration="5700" Power="0.7" Cadence="85" CadenceResting="95">
+      <textevent timeoffset="0" message="Konstante Zone 2 - aerobe Basis"/>
+    </SteadyState>
+    <Cooldown Duration="600" PowerLow="0.7" PowerHigh="0.55" Cadence="85">
+      <textevent timeoffset="0" message="Ausklingen"/>
+    </Cooldown>
+  </workout>
+</workout_file>

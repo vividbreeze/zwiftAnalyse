@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workout_file>
+  <author>Training App</author>
+  <name>Sweet Spot - Steady State</name>
+  <description>2x20min @ 88% FTP - klassisches Sweet Spot Training</description>
+  <sportType>bike</sportType>
+  <tags>
+    <tag name="Sweet Spot"/>
+  </tags>
+  <workout>
+    <Warmup Duration="600" PowerLow="0.55" PowerHigh="0.7" Cadence="90" CadenceResting="95">
+      <textevent timeoffset="0" message="Aufwärmen"/>
+    </Warmup>
+    <SteadyState Duration="1200" Power="0.88" Cadence="88" CadenceResting="95">
+      <textevent timeoffset="0" message="20min Sweet Spot"/>
+    </SteadyState>
+    <SteadyState Duration="300" Power="0.55" Cadence="85">
+      <textevent timeoffset="0" message="5min Erholung"/>
+    </SteadyState>
+    <SteadyState Duration="1200" Power="0.88" Cadence="88" CadenceResting="95">
+      <textevent timeoffset="0" message="20min Sweet Spot"/>
+    </SteadyState>
+    <Cooldown Duration="300" PowerLow="0.7" PowerHigh="0.5" Cadence="85">
+      <textevent timeoffset="0" message="Abkühlen"/>
+    </Cooldown>
+  </workout>
+</workout_file>

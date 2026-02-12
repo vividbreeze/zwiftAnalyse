@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workout_file>
+  <author>Training App</author>
+  <name>Pyramid - Full Spectrum</name>
+  <description>Pyramide: 1-2-3-4-3-2-1min @ verschiedenen Intensitäten</description>
+  <sportType>bike</sportType>
+  <tags>
+    <tag name="Mixed"/>
+  </tags>
+  <workout>
+    <Warmup Duration="900" PowerLow="0.55" PowerHigh="0.75" Cadence="90" CadenceResting="95">
+      <textevent timeoffset="0" message="Aufwärmen"/>
+    </Warmup>
+    <SteadyState Duration="60" Power="1.1" Cadence="95" CadenceResting="105">
+      <textevent timeoffset="0" message="1min @ 110%"/>
+    </SteadyState>
+    <SteadyState Duration="60" Power="0.55" Cadence="85">
+      <textevent timeoffset="0" message="1min Pause"/>
+    </SteadyState>
+    <SteadyState Duration="120" Power="1.05" Cadence="92" CadenceResting="100">
+      <textevent timeoffset="0" message="2min @ 105%"/>
+    </SteadyState>
+    <SteadyState Duration="120" Power="0.55" Cadence="85">
+      <textevent timeoffset="0" message="2min Pause"/>
+    </SteadyState>
+    <SteadyState Duration="180" Power="1" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="3min @ 100%"/>
+    </SteadyState>
+    <SteadyState Duration="180" Power="0.55" Cadence="85">
+      <textevent timeoffset="0" message="3min Pause"/>
+    </SteadyState>
+    <SteadyState Duration="240" Power="0.95" Cadence="90" CadenceResting="95">
+      <textevent timeoffset="0" message="4min @ 95%"/>
+    </SteadyState>
+    <SteadyState Duration="240" Power="0.55" Cadence="85">
+      <textevent timeoffset="0" message="4min Pause"/>
+    </SteadyState>
+    <SteadyState Duration="180" Power="1" Cadence="92" CadenceResting="98">
+      <textevent timeoffset="0" message="3min @ 100%"/>
+    </SteadyState>
+    <SteadyState Duration="180" Power="0.55" Cadence="85">
+      <textevent timeoffset="0" message="3min Pause"/>
+    </SteadyState>
+    <SteadyState Duration="120" Power="1.05" Cadence="92" CadenceResting="100">
+      <textevent timeoffset="0" message="2min @ 105%"/>
+    </SteadyState>
+    <SteadyState Duration="120" Power="0.55" Cadence="85">
+      <textevent timeoffset="0" message="2min Pause"/>
+    </SteadyState>
+    <SteadyState Duration="60" Power="1.1" Cadence="95" CadenceResting="105">
+      <textevent timeoffset="0" message="1min @ 110% - Finish!"/>
+    </SteadyState>
+    <Cooldown Duration="600" PowerLow="0.7" PowerHigh="0.5" Cadence="85">
+      <textevent timeoffset="0" message="Abkühlen"/>
+    </Cooldown>
+  </workout>
+</workout_file>
