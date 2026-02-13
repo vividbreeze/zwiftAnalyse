@@ -3,8 +3,11 @@ import { Settings as SettingsIcon, Save, X } from 'lucide-react';
 import type { AppSettings } from '../types';
 
 import SettingsProfile from './settings/SettingsProfile';
+import SettingsTrainingGoal from './settings/SettingsTrainingGoal';
+import SettingsGoogleAuth from './settings/SettingsGoogleAuth';
 import SettingsStrava from './settings/SettingsStrava';
 import SettingsWithings from './settings/SettingsWithings';
+import SettingsWorkouts from './settings/SettingsWorkouts';
 
 import { useSettings } from '../context/SettingsContext';
 
@@ -27,6 +30,11 @@ const Settings: React.FC<SettingsProps> = ({ isOpen, onClose, onSave }) => {
     const handleChange = (field: keyof AppSettings, value: any) => {
         updateSettings({ [field]: value });
         setSaved(false);
+        // Auto-save critical settings immediately
+        if (field === 'trainingGoal' || field === 'maxHr' || field === 'restingHr' || field === 'ftp') {
+            // Trigger save after state update
+            setTimeout(() => saveSettings(), 0);
+        }
     };
 
     const handleSave = () => {
@@ -58,8 +66,11 @@ const Settings: React.FC<SettingsProps> = ({ isOpen, onClose, onSave }) => {
                 {/* Content */}
                 <div className="p-6 overflow-y-auto max-h-[70vh]">
                     <SettingsProfile settings={settings} onChange={handleChange} />
+                    <SettingsTrainingGoal settings={settings} onChange={handleChange} />
+                    <SettingsGoogleAuth settings={settings} onChange={handleChange} />
                     <SettingsStrava settings={settings} onChange={handleChange} />
                     <SettingsWithings settings={settings} onChange={handleChange} />
+                    <SettingsWorkouts />
                 </div>
 
                 {/* Footer */}

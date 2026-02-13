@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run typecheck:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run test:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm install:*)",
+      "Bash(test:*)",
+      "Bash(~/.claude/claude_desktop_config.json << 'EOF'\n{\n  \"mcpServers\": {\n    \"chrome-devtools\": {\n      \"command\": \"npx\",\n      \"args\": [\n        \"-y\",\n        \"chrome-devtools-mcp@latest\",\n        \"--browser-url=http://127.0.0.1:9222\"\n      ]\n    }\n  }\n}\nEOF)",
+      "WebFetch(domain:localhost)",
+      "Bash(python3:*)",
+      "mcp__chrome-devtools__list_pages",
+      "mcp__chrome-devtools__navigate_page",
+      "mcp__chrome-devtools__take_snapshot",
+      "mcp__chrome-devtools__take_screenshot",
+      "mcp__chrome-devtools__click",
+      "mcp__chrome-devtools__list_console_messages"
+    ]
+  }
+}

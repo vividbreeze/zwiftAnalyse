@@ -22,6 +22,11 @@ const getStravaCredentials = (): StravaCredentials => {
  */
 export const getAuthUrl = (): string => {
     const { clientId } = getStravaCredentials();
+
+    if (!clientId || clientId === 'your_strava_client_id') {
+        throw new Error('Strava Client ID not configured. Please set it in Settings or .env file.');
+    }
+
     return `${APP_CONFIG.STRAVA.AUTH_URL}?client_id=${clientId}&response_type=code&redirect_uri=${APP_CONFIG.REDIRECT_URI}&approval_prompt=force&scope=${APP_CONFIG.STRAVA.SCOPE}`;
 };
 

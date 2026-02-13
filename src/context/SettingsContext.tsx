@@ -12,6 +12,9 @@ const DEFAULT_SETTINGS: AppSettings = {
     gender: 'male',
     ftp: 200,
 
+    // Google OAuth (App Access Protection)
+    googleClientId: '',
+
     // Strava Credentials
     stravaClientId: '',
     stravaClientSecret: '',
@@ -26,7 +29,10 @@ const DEFAULT_SETTINGS: AppSettings = {
 
     // Display Options
     weeksToShow: 6,
-    zoneMethod: 'karvonen'
+    zoneMethod: 'karvonen',
+
+    // Training Goal
+    trainingGoal: 'general_fitness'
 };
 
 interface SettingsContextType {
@@ -39,6 +45,7 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 
 export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
+    const [shouldSave, setShouldSave] = useState(false);
 
     // Load settings on mount
     useEffect(() => {
@@ -52,16 +59,24 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         }
     }, []);
 
+    // Auto-save settings when shouldSave flag is set
+    useEffect(() => {
+        if (shouldSave) {
+            try {
+                localStorage.setItem('zwiftAnalyseSettings', JSON.stringify(settings));
+                setShouldSave(false);
+            } catch (e) {
+                console.error('Error saving settings:', e);
+            }
+        }
+    }, [settings, shouldSave]);
+
     const updateSettings = (newSettings: Partial<AppSettings>) => {
         setSettings(prev => ({ ...prev, ...newSettings }));
     };
 
     const saveSettings = () => {
-        try {
-            localStorage.setItem('zwiftAnalyseSettings', JSON.stringify(settings));
-        } catch (e) {
-            console.error('Error saving settings:', e);
-        }
+        setShouldSave(true);
     };
 
     return (

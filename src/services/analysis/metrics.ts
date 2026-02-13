@@ -123,16 +123,35 @@ const generatePerformanceInsight = (metrics: PerformanceMetrics): string[] | nul
         insights.push(`**${metrics.powerToWeight} W/kg** (${level})`);
     }
 
+    // Weight trend with intelligent analysis based on body composition data
     if (metrics.weightTrend) {
         const trend = metrics.weightTrend;
-        if (trend.direction === 'down') {
-            insights.push(`📉 Gewicht: **${trend.change} kg** über ${trend.weeks} Wochen – gut für W/kg!`);
-        } else if (trend.direction === 'up') {
-            insights.push(`📈 Gewicht: **+${Math.abs(Number(trend.change))} kg** – prüfe ob Muskelaufbau oder Fett.`);
-        }
-    }
+        const bc = metrics.bodyCompTrend;
 
-    if (metrics.bodyCompTrend) {
+        if (trend.direction === 'down') {
+            // Weight is decreasing
+            if (bc?.muscleDirection === 'down' && bc?.fatDirection !== 'down') {
+                insights.push(`⚠️ Gewicht: **${trend.change} kg** – Achtung: Muskelverlust (${bc.muscleChange} kg)!`);
+            } else if (bc?.fatDirection === 'down') {
+                insights.push(`✅ Gewicht: **${trend.change} kg** – Fett ↓ ${Math.abs(Number(bc.fatChange))}% (optimal!)` );
+            } else {
+                insights.push(`📉 Gewicht: **${trend.change} kg** über ${trend.weeks} Wochen – gut für W/kg!`);
+            }
+        } else if (trend.direction === 'up') {
+            // Weight is increasing
+            if (bc?.muscleDirection === 'up' && bc?.fatDirection !== 'up') {
+                insights.push(`💪 Gewicht: **+${Math.abs(Number(trend.change))} kg** – davon +${bc.muscleChange} kg Muskeln!`);
+            } else if (bc?.muscleDirection === 'up' && bc?.fatDirection === 'up') {
+                insights.push(`📈 Gewicht: **+${Math.abs(Number(trend.change))} kg** – Muskeln +${bc.muscleChange} kg, Fett +${bc.fatChange}%`);
+            } else if (bc?.fatDirection === 'up') {
+                insights.push(`📈 Gewicht: **+${Math.abs(Number(trend.change))} kg** – hauptsächlich Fett (+${bc.fatChange}%)`);
+            } else {
+                // No body composition data available
+                insights.push(`📈 Gewicht: **+${Math.abs(Number(trend.change))} kg** – prüfe ob Muskelaufbau oder Fett.`);
+            }
+        }
+    } else if (metrics.bodyCompTrend) {
+        // Only body comp data, no weight trend (add standalone body comp insights)
         const bc = metrics.bodyCompTrend;
         if (bc.fatDirection === 'down' && bc.muscleDirection !== 'down') {
             insights.push(`✅ Ideale Körperkomposition: Fett ↓ ${Math.abs(Number(bc.fatChange))}%`);

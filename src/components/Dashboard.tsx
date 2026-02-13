@@ -1,10 +1,11 @@
 import React, { useState, useMemo, lazy, Suspense } from 'react';
-import { analyzeOverallProgress, calculatePerformanceMetrics } from '../services/analysis/index';
+import { analyzeOverallProgress, calculatePerformanceMetrics, estimateFTP } from '../services/analysis/index';
 // ChartJS registration is now handled in main.tsx
-import { Activity, Clock, TrendingUp, Settings as SettingsIcon, Scale } from 'lucide-react';
+import { Activity, Clock, TrendingUp, Settings as SettingsIcon, Scale, Zap, LogOut } from 'lucide-react';
 import { calculateZones } from '../config/user';
 import Settings from './Settings';
 import { useSettings } from '../context/SettingsContext';
+import { useAuth } from '../contexts/AuthContext';
 import type { WeeklyStats } from '../types';
 
 // Custom Hooks
@@ -16,16 +17,20 @@ import CoachAssessment from './CoachAssessment';
 import SummaryCard from './SummaryCard';
 import ActivityModal from './ActivityModal';
 import WeeklyTable from './WeeklyTable';
+import FormatFeedback from './FormatFeedback';
 
 // Lazy loaded charts
 const PowerHRChart = lazy(() => import('./charts/PowerHRChart'));
 const EfficiencyChart = lazy(() => import('./charts/EfficiencyChart'));
 const ZonesChart = lazy(() => import('./charts/ZonesChart'));
+const WeightChart = lazy(() => import('./charts/WeightChart'));
 const BodyCompChart = lazy(() => import('./charts/BodyCompChart'));
+const BloodPressureChart = lazy(() => import('./charts/BloodPressureChart'));
+const WorkoutRecommendations = lazy(() => import('./workouts/WorkoutRecommendations'));
 
 // Loading skeleton for charts
 const ChartSkeleton = () => (
-    <div className="bg-white p-4 rounded-xl shadow-md h-[300px] flex items-center justify-center animate-pulse">
+    <div className="bg-white p-4 rounded-xl shadow-md h-[280px] flex items-center justify-center animate-pulse">
         <div className="w-8 h-8 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
     </div>
 );
@@ -48,10 +53,21 @@ const Dashboard: React.FC<DashboardProps> = ({ stats }) => {
     // Get settings from context
     const { settings } = useSettings();
 
+    // Get auth context (only if OAuth is configured)
+    let authContext = null;
+    try {
+        if (settings.googleClientId) {
+            authContext = useAuth();
+        }
+    } catch (e) {
+        // useAuth not available (no AuthProvider)
+    }
+
     // Custom Hooks
     const {
         connected: withingsConnected,
         bodyComposition,
+        bloodPressure,
         latestWeight,
         connect: connectWithings
     } = useWithings();
@@ -81,10 +97,10 @@ const Dashboard: React.FC<DashboardProps> = ({ stats }) => {
         setExpandedWeeks(prev => ({ ...prev, [index]: !prev[index] }));
     };
 
-    // Memoized analysis
+    // Memoized analysis - explicitly depend on trainingGoal to ensure updates
     const overallProgress = useMemo(
-        () => analyzeOverallProgress(stats, latestWeight, bodyComposition),
-        [stats, latestWeight, bodyComposition]
+        () => analyzeOverallProgress(stats, latestWeight, bodyComposition, bloodPressure, settings),
+        [stats, latestWeight, bodyComposition, bloodPressure, settings, settings.trainingGoal]
     );
 
     const performanceMetrics = useMemo(() => {
@@ -92,13 +108,32 @@ const Dashboard: React.FC<DashboardProps> = ({ stats }) => {
         return calculatePerformanceMetrics(currentStats, latestWeight, bodyComposition, stats);
     }, [stats, latestWeight, bodyComposition]);
 
+    // FTP estimation
+    const ftpEstimate = useMemo(() => {
+        return estimateFTP(stats, settings.ftp);
+    }, [stats, settings.ftp]);
+
     const currentWeek = stats[stats.length - 1];
 
     return (
         <div className="p-6 space-y-6">
             {/* Header */}
             <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold text-gray-800">Training Dashboard</h1>
+                <div className="flex items-center gap-3">
+                    <h1 className="text-3xl font-bold text-gray-800">Training Dashboard</h1>
+                    <div className="px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200">
+                        <span className="text-sm font-medium text-indigo-700">
+                            {settings.trainingGoal === 'weight_loss' ? 'Gewicht verlieren' :
+                             settings.trainingGoal === 'increase_ftp' ? 'FTP steigern' :
+                             settings.trainingGoal === 'build_endurance' ? 'Ausdauer aufbauen' :
+                             settings.trainingGoal === 'improve_vo2max' ? 'VO2max verbessern' :
+                             settings.trainingGoal === 'build_base' ? 'Grundlagenausdauer aufbauen' :
+                             settings.trainingGoal === 'race_prep' ? 'Wettkampfvorbereitung' :
+                             settings.trainingGoal === 'maintenance' ? 'Formerhaltung' :
+                             'Allgemeine Fitness'}
+                        </span>
+                    </div>
+                </div>
                 <div className="flex items-center gap-2">
                     {!withingsConnected ? (
                         <button
@@ -115,6 +150,20 @@ const Dashboard: React.FC<DashboardProps> = ({ stats }) => {
                             {latestWeight ? `${latestWeight.weight} kg` : 'Verbunden'}
                         </div>
                     )}
+                    {authContext && authContext.user && (
+                        <button
+                            onClick={() => {
+                                if (confirm('Möchtest du dich wirklich abmelden?')) {
+                                    authContext.logout();
+                                }
+                            }}
+                            className="px-3 py-2 rounded-lg bg-white shadow-md hover:bg-gray-50 transition-colors border border-gray-200 flex items-center gap-2"
+                            title="Abmelden"
+                        >
+                            <LogOut className="w-4 h-4 text-gray-600" />
+                            <span className="text-sm text-gray-700">Logout</span>
+                        </button>
+                    )}
                     <button
                         onClick={() => setSettingsOpen(true)}
                         className="p-2 rounded-lg bg-white shadow-md hover:bg-gray-50 transition-colors border border-gray-200"
@@ -129,7 +178,16 @@ const Dashboard: React.FC<DashboardProps> = ({ stats }) => {
             <Settings isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} onSave={() => { }} />
 
             {/* Coach's Assessment */}
-            <CoachAssessment overallProgress={overallProgress} performanceMetrics={performanceMetrics} />
+            <CoachAssessment
+                overallProgress={overallProgress}
+                performanceMetrics={performanceMetrics}
+                ftpEstimate={ftpEstimate}
+            />
+
+            {/* Workout Recommendations */}
+            <Suspense fallback={<ChartSkeleton />}>
+                <WorkoutRecommendations stats={stats} trainingGoal={settings.trainingGoal} ftp={settings.ftp} />
+            </Suspense>
 
             {/* Summary Cards */}
             <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
@@ -155,8 +213,8 @@ const Dashboard: React.FC<DashboardProps> = ({ stats }) => {
                 <SummaryCard title="Avg Cadence" value={`${currentWeek?.avgCadence || 0} rpm`} icon={<Clock className="w-6 h-6 text-purple-500" />} />
             </div>
 
-            {/* Charts Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Charts Grid - 2x3 Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <Suspense fallback={<ChartSkeleton />}>
                     <PowerHRChart labels={labels} stats={stats} />
                 </Suspense>
@@ -167,8 +225,18 @@ const Dashboard: React.FC<DashboardProps> = ({ stats }) => {
                     <ZonesChart labels={labels} stats={stats} zones={zones} />
                 </Suspense>
                 {withingsConnected && bodyComposition.length > 0 && (
+                    <>
+                        <Suspense fallback={<ChartSkeleton />}>
+                            <WeightChart labels={labels} bodyComposition={bodyComposition} />
+                        </Suspense>
+                        <Suspense fallback={<ChartSkeleton />}>
+                            <BodyCompChart labels={labels} bodyComposition={bodyComposition} />
+                        </Suspense>
+                    </>
+                )}
+                {withingsConnected && bloodPressure.length > 0 && (
                     <Suspense fallback={<ChartSkeleton />}>
-                        <BodyCompChart labels={labels} bodyComposition={bodyComposition} />
+                        <BloodPressureChart labels={labels} bloodPressure={bloodPressure} />
                     </Suspense>
                 )}
             </div>

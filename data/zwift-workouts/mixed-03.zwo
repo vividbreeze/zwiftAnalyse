@@ -2,7 +2,7 @@
 <workout_file>
   <author>Training App</author>
   <name>All-Rounder - Complete Package</name>
-  <description>Kombiniert: Endurance, Sweet Spot, Threshold & VO2max</description>
+  <description>Kombiniert: Endurance, Sweet Spot, Threshold &amp; VO2max</description>
   <sportType>bike</sportType>
   <tags>
     <tag name="Mixed"/>

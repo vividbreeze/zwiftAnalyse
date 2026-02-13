@@ -2,7 +2,7 @@
 <workout_file>
   <author>Training App</author>
   <name>Tempo - Extended Threshold</name>
-  <description>1x30min @ 94% FTP - mentale & physische Schwelle</description>
+  <description>1x30min @ 94% FTP - mentale &amp; physische Schwelle</description>
   <sportType>bike</sportType>
   <tags>
     <tag name="Tempo"/>

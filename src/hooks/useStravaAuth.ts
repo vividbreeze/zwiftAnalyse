@@ -87,7 +87,13 @@ export const useStravaAuth = (): UseStravaAuthReturn => {
     }, [queryError]);
 
     const handleLogin = () => {
-        window.location.href = getAuthUrl();
+        try {
+            const authUrl = getAuthUrl();
+            window.location.href = authUrl;
+        } catch (error) {
+            console.error('Failed to generate auth URL:', error);
+            setAuthError((error as Error).message);
+        }
     };
 
     return {

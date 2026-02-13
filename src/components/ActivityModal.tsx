@@ -39,13 +39,17 @@ const ActivityModal: React.FC<ActivityModalProps> = ({ activity, detailedActivit
 
                     {/* Coach's Feedback */}
                     {analysisValues && (
-                        <div className="space-y-2 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-100">
-                            <h3 className="text-lg font-semibold text-indigo-800 flex items-center">
-                                <TrendingUp className="w-5 h-5 mr-2" />
+                        <div className="space-y-2 bg-white p-4 rounded-lg border border-gray-200">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-2">
                                 Coach&apos;s Feedback
                             </h3>
-                            <div className="prose prose-sm max-w-none" data-testid="coach-feedback">
-                                <FormatFeedback text={analysisValues.feedback} />
+                            <div className="flex items-start gap-3" data-testid="coach-feedback">
+                                <div className="w-6 flex-shrink-0">
+                                    <TrendingUp className="w-5 h-5 text-indigo-600" />
+                                </div>
+                                <div className="flex-1 text-sm text-gray-700">
+                                    <FormatFeedback text={analysisValues.feedback.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|🔄|⚡|📈|📉|💪|👍|🎯|✓|✔|⚠|⭐/gu, '').trim()} />
+                                </div>
                             </div>
 
                             {/* Zone Distribution Bar */}

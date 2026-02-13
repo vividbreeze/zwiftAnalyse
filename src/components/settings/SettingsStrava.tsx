@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Key } from 'lucide-react';
 import type { AppSettings } from '../../types';
 
@@ -8,6 +8,11 @@ interface SettingsStravaProps {
 }
 
 const SettingsStrava: React.FC<SettingsStravaProps> = ({ settings, onChange }) => {
+    const [editingClientId, setEditingClientId] = useState(false);
+    const [editingClientSecret, setEditingClientSecret] = useState(false);
+    const [localClientId, setLocalClientId] = useState('');
+    const [localClientSecret, setLocalClientSecret] = useState('');
+
     return (
         <div className="mb-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-700">
@@ -23,10 +28,20 @@ const SettingsStrava: React.FC<SettingsStravaProps> = ({ settings, onChange }) =
                     <input
                         id="stravaClientId"
                         data-testid="input-stravaClientId"
-                        type="text"
-                        value={settings.stravaClientId}
-                        onChange={(e) => onChange('stravaClientId', e.target.value)}
-                        placeholder="Enter your Strava Client ID"
+                        type="password"
+                        value={editingClientId ? localClientId : ''}
+                        onChange={(e) => {
+                            setLocalClientId(e.target.value);
+                            if (e.target.value) {
+                                onChange('stravaClientId', e.target.value);
+                            }
+                        }}
+                        onFocus={() => {
+                            setEditingClientId(true);
+                            setLocalClientId('');
+                        }}
+                        onBlur={() => setEditingClientId(false)}
+                        placeholder={settings.stravaClientId ? '••••••• (configured)' : 'Enter your Strava Client ID'}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                 </div>
@@ -36,9 +51,19 @@ const SettingsStrava: React.FC<SettingsStravaProps> = ({ settings, onChange }) =
                         id="stravaClientSecret"
                         data-testid="input-stravaClientSecret"
                         type="password"
-                        value={settings.stravaClientSecret}
-                        onChange={(e) => onChange('stravaClientSecret', e.target.value)}
-                        placeholder="Enter your Strava Client Secret"
+                        value={editingClientSecret ? localClientSecret : ''}
+                        onChange={(e) => {
+                            setLocalClientSecret(e.target.value);
+                            if (e.target.value) {
+                                onChange('stravaClientSecret', e.target.value);
+                            }
+                        }}
+                        onFocus={() => {
+                            setEditingClientSecret(true);
+                            setLocalClientSecret('');
+                        }}
+                        onBlur={() => setEditingClientSecret(false)}
+                        placeholder={settings.stravaClientSecret ? '••••••• (configured)' : 'Enter your Strava Client Secret'}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                 </div>

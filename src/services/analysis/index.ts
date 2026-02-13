@@ -8,6 +8,7 @@ import type { EnrichedActivity, Lap, WeeklyStats, ActivityAnalysis } from '../..
 export * from './zones';
 export * from './metrics';
 export * from './progress';
+export * from './ftp';
 
 // Main analysis orchestration (kept here for backward compatibility or ease of use)
 export const analyzeActivity = (activity: EnrichedActivity, laps: Lap[], stats: WeeklyStats[]): ActivityAnalysis => {

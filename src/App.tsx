@@ -1,11 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Dashboard from './components/Dashboard';
 import WithingsCallback from './components/WithingsCallback';
-import { Activity } from 'lucide-react';
+import Settings from './components/Settings';
+import Login from './components/Login';
+import { Activity, Settings as SettingsIcon } from 'lucide-react';
 import { useStravaAuth } from './hooks/useStravaAuth';
+import { useSettings } from './context/SettingsContext';
+import { useAuth } from './contexts/AuthContext';
 
 function App() {
   const { stats, loading, error, handleLogin } = useStravaAuth();
+  const { settings } = useSettings();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // Auth check - only if Google OAuth is configured
+  let isAuthenticated = true; // Default to authenticated if no OAuth configured
+  try {
+    if (settings.googleClientId) {
+      const auth = useAuth();
+      isAuthenticated = auth.isAuthenticated;
+    }
+  } catch (e) {
+    // useAuth throws error if used outside AuthProvider
+    // This happens when googleClientId is not configured
+    isAuthenticated = true; // Allow access without auth
+  }
 
   // Check if we're on the Withings callback route
   const isWithingsCallback = window.location.pathname === '/withings/callback';
@@ -13,6 +32,11 @@ function App() {
   // Render Withings callback handler if on that route
   if (isWithingsCallback) {
     return <WithingsCallback />;
+  }
+
+  // Show login if Google OAuth is configured and user is not authenticated
+  if (settings.googleClientId && !isAuthenticated) {
+    return <Login />;
   }
 
   if (loading) {
@@ -40,10 +64,20 @@ function App() {
   if (!stats) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+        <button
+          onClick={() => setSettingsOpen(true)}
+          className="absolute top-6 right-6 p-2 rounded-lg bg-white shadow-md hover:bg-gray-50 transition-colors border border-gray-200"
+          title="Settings"
+        >
+          <SettingsIcon className="w-6 h-6 text-gray-600" />
+        </button>
         <div className="text-center mb-8">
           <Activity className="w-16 h-16 text-orange-500 mx-auto mb-4" />
           <h1 className="text-4xl font-bold text-gray-800 mb-2">Zwift/Strava Analysis</h1>
-          <p className="text-gray-600">Connect your Strava account to visualize your training progress.</p>
+          <p className="text-gray-600 mb-2">Connect your Strava account to visualize your training progress.</p>
+          <p className="text-sm text-gray-500">
+            First time? Click <button onClick={() => setSettingsOpen(true)} className="text-blue-600 underline">Settings</button> to configure your Strava API credentials.
+          </p>
         </div>
         <button
           onClick={handleLogin}
@@ -51,6 +85,7 @@ function App() {
         >
           Connect with Strava
         </button>
+        <Settings isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} onSave={() => {}} />
       </div>
     );
   }

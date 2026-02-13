@@ -103,6 +103,14 @@ export interface BodyCompositionEntry {
     boneMass?: number | null;
 }
 
+/** Withings blood pressure data point */
+export interface BloodPressureEntry {
+    week: string;
+    systolic: number | null;
+    diastolic: number | null;
+    pulse: number | null;
+}
+
 /** Latest weight measurement */
 export interface LatestWeight {
     weight: number | null;
@@ -156,6 +164,14 @@ export interface WeightInsight {
     performanceNote?: string;
 }
 
+/** Blood pressure insight from Withings data */
+export interface BloodPressureInsight {
+    current: { systolic: number; diastolic: number; pulse: number };
+    trend: 'improving' | 'stable' | 'worsening' | 'insufficient_data';
+    message: string;
+    trainingEffect?: string;
+}
+
 /** Overall progress analysis result */
 export interface OverallProgress {
     status: string;
@@ -163,6 +179,7 @@ export interface OverallProgress {
     nextStep: string;
     color: string;
     weightInsight: WeightInsight | null;
+    bloodPressureInsight?: BloodPressureInsight | null;
     performanceInsight?: string[] | null;
 }
 
@@ -195,6 +212,9 @@ export interface AppSettings {
     weight: number;
     ftp: number;
 
+    // Google OAuth (for app access protection)
+    googleClientId: string;
+
     // Strava API
     stravaClientId: string;
     stravaClientSecret: string;
@@ -210,6 +230,9 @@ export interface AppSettings {
     // Display Options
     weeksToShow: number;
     zoneMethod: 'karvonen' | 'percentMax';
+
+    // Training Goal
+    trainingGoal: 'weight_loss' | 'increase_ftp' | 'build_endurance' | 'improve_vo2max' | 'general_fitness' | 'build_base' | 'race_prep' | 'maintenance';
 }
 
 // --- Strava OAuth ---
@@ -242,4 +265,34 @@ export interface WithingsTokenData {
     expires_in: number;
     userid: string;
     token_type: string;
+}
+
+// --- Workout Types ---
+
+/** Parsed Workout Metadata from .zwo file */
+export interface ParsedWorkout {
+    id: string;                    // "sweetspot-01"
+    filename: string;              // "sweetspot-01.zwo"
+    name: string;                  // "Sweet Spot - Steady State"
+    description: string;           // "2x20min @ 88% FTP..."
+    type: 'endurance' | 'ftp-builder' | 'mixed' | 'recovery' | 'sweetspot' | 'tempo' | 'vo2max';
+    author?: string;
+    tags: string[];
+
+    // Calculated metrics
+    duration: number;              // Total seconds
+    durationFormatted: string;     // "60:00"
+    maxPower: number;              // Max power as % FTP (0.88 = 88%)
+    avgPower: number;              // Average power as % FTP
+
+    // Training effect estimation
+    estimatedIntensity: 'recovery' | 'endurance' | 'tempo' | 'sweet-spot' | 'threshold' | 'vo2max';
+}
+
+/** Workout Recommendation with reasoning */
+export interface WorkoutRecommendation {
+    workout: ParsedWorkout;
+    score: number;                 // 0-100
+    reasoning: string;             // German text with markdown
+    priority: 'high' | 'medium' | 'low';
 }

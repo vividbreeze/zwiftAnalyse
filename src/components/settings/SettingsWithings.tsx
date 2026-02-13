@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { AppSettings } from '../../types';
 
 interface SettingsWithingsProps {
@@ -7,6 +7,11 @@ interface SettingsWithingsProps {
 }
 
 const SettingsWithings: React.FC<SettingsWithingsProps> = ({ settings, onChange }) => {
+    const [editingClientId, setEditingClientId] = useState(false);
+    const [editingClientSecret, setEditingClientSecret] = useState(false);
+    const [localClientId, setLocalClientId] = useState('');
+    const [localClientSecret, setLocalClientSecret] = useState('');
+
     return (
         <div className="mb-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-700">
@@ -44,10 +49,20 @@ const SettingsWithings: React.FC<SettingsWithingsProps> = ({ settings, onChange 
                     <input
                         id="withingsClientId"
                         data-testid="input-withingsClientId"
-                        type="text"
-                        value={settings.withingsClientId}
-                        onChange={(e) => onChange('withingsClientId', e.target.value)}
-                        placeholder="Enter your Withings Client ID"
+                        type="password"
+                        value={editingClientId ? localClientId : ''}
+                        onChange={(e) => {
+                            setLocalClientId(e.target.value);
+                            if (e.target.value) {
+                                onChange('withingsClientId', e.target.value);
+                            }
+                        }}
+                        onFocus={() => {
+                            setEditingClientId(true);
+                            setLocalClientId('');
+                        }}
+                        onBlur={() => setEditingClientId(false)}
+                        placeholder={settings.withingsClientId ? '••••••• (configured)' : 'Enter your Withings Client ID'}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                     />
                 </div>
@@ -57,9 +72,19 @@ const SettingsWithings: React.FC<SettingsWithingsProps> = ({ settings, onChange 
                         id="withingsClientSecret"
                         data-testid="input-withingsClientSecret"
                         type="password"
-                        value={settings.withingsClientSecret}
-                        onChange={(e) => onChange('withingsClientSecret', e.target.value)}
-                        placeholder="Enter your Withings Client Secret"
+                        value={editingClientSecret ? localClientSecret : ''}
+                        onChange={(e) => {
+                            setLocalClientSecret(e.target.value);
+                            if (e.target.value) {
+                                onChange('withingsClientSecret', e.target.value);
+                            }
+                        }}
+                        onFocus={() => {
+                            setEditingClientSecret(true);
+                            setLocalClientSecret('');
+                        }}
+                        onBlur={() => setEditingClientSecret(false)}
+                        placeholder={settings.withingsClientSecret ? '••••••• (configured)' : 'Enter your Withings Client Secret'}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                     />
                 </div>

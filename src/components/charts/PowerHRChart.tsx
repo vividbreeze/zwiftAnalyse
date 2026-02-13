@@ -32,6 +32,11 @@ const PowerHRChart: React.FC<PowerHRChartProps> = ({ labels, stats }) => {
     };
 
     const options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: true, position: 'top' as const },
+        },
         scales: {
             y: { type: 'linear' as const, display: true, position: 'left' as const, title: { display: true, text: 'Watts' } },
             y1: { type: 'linear' as const, display: true, position: 'right' as const, grid: { drawOnChartArea: false }, title: { display: true, text: 'BPM' } },
@@ -39,23 +44,11 @@ const PowerHRChart: React.FC<PowerHRChartProps> = ({ labels, stats }) => {
     };
 
     return (
-        <div className="bg-white p-4 rounded-lg shadow">
-            <div className="group relative">
-                <h2 className="text-xl font-semibold mb-4 cursor-help inline-flex items-center">
-                    Power vs Heart Rate
-                    <span className="ml-2 text-gray-400 text-xs">ⓘ</span>
-                </h2>
-                <div className="absolute left-0 top-8 z-50 hidden group-hover:block bg-gray-900 text-white text-sm rounded-lg shadow-xl p-4 w-72">
-                    <div className="font-bold mb-2 border-b border-gray-700 pb-2">Power vs Heart Rate</div>
-                    <p className="text-gray-300 text-xs">
-                        Zeigt den Zusammenhang zwischen deiner durchschnittlichen Leistung (Watts) und Herzfrequenz (BPM) pro Woche.
-                    </p>
-                    <p className="text-gray-400 text-xs mt-2">
-                        <strong>Idealfall:</strong> Power steigt, HR bleibt gleich oder sinkt → bessere Effizienz!
-                    </p>
-                </div>
+        <div className="bg-white p-4 rounded-lg shadow h-[280px]">
+            <h2 className="text-lg font-semibold mb-2">Power vs Heart Rate</h2>
+            <div className="h-[220px]">
+                <Chart type="bar" data={data} options={options} />
             </div>
-            <Chart type="bar" data={data} options={options} />
         </div>
     );
 };

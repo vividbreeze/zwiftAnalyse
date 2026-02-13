@@ -1,59 +1,107 @@
 import React from 'react';
-import { TrendingUp, Scale } from 'lucide-react';
+import { TrendingUp, Scale, Heart, Zap, AlertTriangle } from 'lucide-react';
 import FormatFeedback from './FormatFeedback';
-import type { OverallProgress, PerformanceMetrics } from '../types';
+import type { OverallProgress, PerformanceMetrics, FTPEstimate } from '../types';
 
 interface CoachAssessmentProps {
     overallProgress: OverallProgress | null;
     performanceMetrics: PerformanceMetrics | null;
+    ftpEstimate?: FTPEstimate | null;
 }
 
-const CoachAssessment: React.FC<CoachAssessmentProps> = ({ overallProgress, performanceMetrics }) => {
+const CoachAssessment: React.FC<CoachAssessmentProps> = ({ overallProgress, performanceMetrics, ftpEstimate }) => {
     if (!overallProgress) return null;
 
-    return (
-        <div className={`p-4 rounded-xl border ${overallProgress.color} shadow-sm bg-white`}>
-            <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center">
-                <TrendingUp className="w-5 h-5 mr-2 text-indigo-600" />
-                Coach's Assessment: {overallProgress.status}
-            </h2>
-            <div className="text-gray-700 mb-3">
-                <FormatFeedback text={overallProgress.message} />
-            </div>
+    // Helper to strip emojis and symbols from text
+    const stripSymbols = (text: string) => {
+        return text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|🔄|⚡|📈|📉|💪|👍|🎯|✓|✔|⚠|⭐/gu, '').trim();
+    };
 
-            <div className="bg-indigo-50/50 p-3 rounded-lg border border-indigo-100 mt-2">
-                <div className="text-gray-800 font-medium flex items-start gap-2">
-                    <span className="bg-indigo-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded mt-0.5 uppercase tracking-wide">Next Step</span>
-                    <div className="flex-1 text-sm">
-                        <FormatFeedback text={overallProgress.nextStep} />
+    return (
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+            <h2 className="text-lg font-bold text-gray-800 mb-3">Coach's Assessment</h2>
+
+            <div className="space-y-1">
+                {/* Main Status */}
+                <div className="flex items-start gap-3 py-2">
+                    <div className="w-6 flex-shrink-0">
+                        <TrendingUp className="w-5 h-5 text-indigo-600" />
+                    </div>
+                    <div className="flex-1 text-sm text-gray-700">
+                        <FormatFeedback text={stripSymbols(overallProgress.message)} />
                     </div>
                 </div>
-            </div>
 
-            {/* Weight Insight from Withings */}
-            {overallProgress.weightInsight && (
-                <div className="bg-teal-50/50 p-2.5 rounded-lg border border-teal-100 mt-2 flex items-start gap-2.5">
-                    <Scale className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" />
-                    <div className="flex-1">
-                        <div className="text-teal-800 text-sm font-medium">
-                            <FormatFeedback text={overallProgress.weightInsight.message} />
+                {/* Next Step */}
+                <div className="flex items-start gap-3 py-2 bg-indigo-50 -mx-4 px-4 border-l-4 border-indigo-500">
+                    <div className="w-6 flex-shrink-0">
+                        <AlertTriangle className="w-5 h-5 text-indigo-600" />
+                    </div>
+                    <div className="flex-1 text-sm text-gray-800">
+                        <FormatFeedback text={stripSymbols(overallProgress.nextStep)} />
+                    </div>
+                </div>
+
+                {/* FTP Estimate */}
+                {ftpEstimate && (
+                    <div className="flex items-start gap-3 py-2">
+                        <div className="w-6 flex-shrink-0">
+                            <Zap className="w-5 h-5 text-yellow-600" />
+                        </div>
+                        <div className="flex-1 text-sm text-gray-700">
+                            <FormatFeedback text={stripSymbols(ftpEstimate.recommendation)} />
                         </div>
                     </div>
-                </div>
-            )}
+                )}
 
-            {/* Performance Insights (combined weight + training metrics) */}
-            {performanceMetrics?.performanceInsight && performanceMetrics.performanceInsight.length > 0 && (
-                <div className="mt-3 pt-2 border-t border-gray-100">
-                    <div className="flex flex-wrap gap-2">
-                        {performanceMetrics.performanceInsight.map((insight, idx) => (
-                            <div key={idx} className="bg-gray-50 px-2.5 py-1 rounded-md text-xs text-indigo-700 border border-gray-200 font-medium">
-                                <FormatFeedback text={insight} />
-                            </div>
-                        ))}
+                {/* Weight Insight */}
+                {overallProgress.weightInsight && (
+                    <div className="flex items-start gap-3 py-2">
+                        <div className="w-6 flex-shrink-0">
+                            <Scale className="w-5 h-5 text-teal-600" />
+                        </div>
+                        <div className="flex-1 text-sm text-gray-700">
+                            <FormatFeedback text={stripSymbols(overallProgress.weightInsight.message)} />
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
+
+                {/* Blood Pressure Insight */}
+                {overallProgress.bloodPressureInsight && (
+                    <div className="flex items-start gap-3 py-2">
+                        <div className="w-6 flex-shrink-0">
+                            <Heart className={`w-5 h-5 ${
+                                overallProgress.bloodPressureInsight.trend === 'improving'
+                                    ? 'text-green-600'
+                                    : overallProgress.bloodPressureInsight.trend === 'worsening'
+                                    ? 'text-orange-600'
+                                    : 'text-blue-600'
+                            }`} />
+                        </div>
+                        <div className="flex-1 text-sm text-gray-700">
+                            <FormatFeedback text={stripSymbols(overallProgress.bloodPressureInsight.message)} />
+                        </div>
+                    </div>
+                )}
+
+                {/* Performance Insights */}
+                {performanceMetrics?.performanceInsight && performanceMetrics.performanceInsight.length > 0 && (
+                    <div className="pt-2 border-t border-gray-100 mt-2">
+                        <div className="space-y-1">
+                            {performanceMetrics.performanceInsight.map((insight, idx) => (
+                                <div key={idx} className="flex items-start gap-3 py-1">
+                                    <div className="w-6 flex-shrink-0">
+                                        <TrendingUp className="w-4 h-4 text-gray-400" />
+                                    </div>
+                                    <div className="flex-1 text-xs text-gray-600">
+                                        <FormatFeedback text={stripSymbols(insight)} />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { loadSettings, saveSettings } from '../components/settings/utils';
-import type { WithingsTokenData, BodyCompositionEntry, LatestWeight } from '../types';
+import type { WithingsTokenData, BodyCompositionEntry, LatestWeight, BloodPressureEntry } from '../types';
 
 interface WithingsCredentials {
     clientId: string;
@@ -21,6 +21,9 @@ interface ParsedMeasurement {
     fatRatio?: number;
     muscleMass?: number;
     fatMass?: number;
+    systolic?: number;
+    diastolic?: number;
+    pulse?: number;
 }
 
 interface WeeklyAccumulator {
@@ -43,6 +46,9 @@ const MEAS_TYPES = {
     FAT_FREE_MASS: 5,   // kg
     FAT_RATIO: 6,       // %
     FAT_MASS: 8,        // kg
+    DIASTOLIC_BP: 9,    // mmHg
+    SYSTOLIC_BP: 10,    // mmHg
+    HEART_PULSE: 11,    // bpm
     MUSCLE_MASS: 76,    // kg
     HYDRATION: 77,      // kg
     BONE_MASS: 88       // kg
@@ -326,6 +332,15 @@ const parseMeasurements = (measureGroups: any[]): ParsedMeasurement[] => {
                 case MEAS_TYPES.FAT_MASS:
                     result.fatMass = Math.round(value * 10) / 10; // kg with 1 decimal
                     break;
+                case MEAS_TYPES.SYSTOLIC_BP:
+                    result.systolic = Math.round(value); // mmHg
+                    break;
+                case MEAS_TYPES.DIASTOLIC_BP:
+                    result.diastolic = Math.round(value); // mmHg
+                    break;
+                case MEAS_TYPES.HEART_PULSE:
+                    result.pulse = Math.round(value); // bpm
+                    break;
             }
         });
 
@@ -398,4 +413,67 @@ const getWeekKey = (date: Date): string => {
 const avg = (arr: number[]): number | null => {
     if (!arr || arr.length === 0) return null;
     return Math.round((arr.reduce((a: number, b: number) => a + b, 0) / arr.length) * 10) / 10;
+};
+
+/**
+ * Get blood pressure data formatted for charts (last 6 weeks)
+ */
+export const getBloodPressureForChart = async (): Promise<BloodPressureEntry[]> => {
+    try {
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 42); // 6 weeks
+
+        const accessToken = await getValidAccessToken();
+
+        const params = new URLSearchParams({
+            action: 'getmeas',
+            meastypes: `${MEAS_TYPES.SYSTOLIC_BP},${MEAS_TYPES.DIASTOLIC_BP},${MEAS_TYPES.HEART_PULSE}`,
+            category: '1',
+            startdate: String(Math.floor(startDate.getTime() / 1000)),
+            enddate: String(Math.floor(endDate.getTime() / 1000))
+        });
+
+        const response = await axios.post(WITHINGS_MEASURE_URL, params, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        });
+
+        if (response.data.status === 0 && response.data.body) {
+            const measures = parseMeasurements(response.data.body.measuregrps);
+
+            // Group by week
+            const weeklyData: Record<string, { systolic: number[], diastolic: number[], pulse: number[] }> = {};
+
+            measures.forEach(m => {
+                const weekKey = getWeekKey(m.date);
+                if (!weeklyData[weekKey]) {
+                    weeklyData[weekKey] = { systolic: [], diastolic: [], pulse: [] };
+                }
+                if (m.systolic) weeklyData[weekKey].systolic.push(m.systolic);
+                if (m.diastolic) weeklyData[weekKey].diastolic.push(m.diastolic);
+                if (m.pulse) weeklyData[weekKey].pulse.push(m.pulse);
+            });
+
+            // Calculate averages
+            return Object.keys(weeklyData)
+                .map(week => ({
+                    week,
+                    systolic: avg(weeklyData[week].systolic),
+                    diastolic: avg(weeklyData[week].diastolic),
+                    pulse: avg(weeklyData[week].pulse)
+                }))
+                .sort((a, b) => {
+                    const [aDay, aMonth] = a.week.split('/').map(Number);
+                    const [bDay, bMonth] = b.week.split('/').map(Number);
+                    return (aMonth * 100 + aDay) - (bMonth * 100 + bDay);
+                });
+        }
+        return [];
+    } catch (error) {
+        console.error('Error getting blood pressure for chart:', error);
+        return [];
+    }
 };

@@ -26,6 +26,9 @@ export const DEFAULT_SETTINGS = {
     // Display Options
     weeksToShow: 6,
     zoneMethod: 'karvonen' as const, // 'karvonen' or 'percentMax'
+
+    // Training Goal
+    trainingGoal: 'general_fitness' as const,
 };
 
 // Load settings from localStorage or use defaults

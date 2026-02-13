@@ -1,12 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
-import { isWithingsConnected, getWithingsAuthUrl, getBodyCompositionForChart, getLatestMeasures } from '../services/withings';
+import { isWithingsConnected, getWithingsAuthUrl, getBodyCompositionForChart, getLatestMeasures, getBloodPressureForChart } from '../services/withings';
 import { loadSettings } from '../components/settings/utils';
-import type { BodyCompositionEntry, LatestWeight } from '../types';
+import type { BodyCompositionEntry, LatestWeight, BloodPressureEntry } from '../types';
 
 interface UseWithingsReturn {
     connected: boolean;
     loading: boolean;
     bodyComposition: BodyCompositionEntry[];
+    bloodPressure: BloodPressureEntry[];
     latestWeight: LatestWeight | null;
     connect: (onError: () => void) => void;
 }
@@ -31,6 +32,14 @@ export const useWithings = (): UseWithingsReturn => {
         retry: 1,
     });
 
+    const { data: bloodPressure = [], isLoading: loadingBP } = useQuery({
+        queryKey: ['withings', 'bloodPressure'],
+        queryFn: getBloodPressureForChart,
+        enabled: connected,
+        staleTime: 1000 * 60 * 30, // 30 minutes
+        retry: 1,
+    });
+
     // Handle OAuth connection redirect
     const connect = (onError: () => void) => {
         const settings = loadSettings();
@@ -46,8 +55,9 @@ export const useWithings = (): UseWithingsReturn => {
 
     return {
         connected,
-        loading: loadingBodyComp || loadingWeight,
+        loading: loadingBodyComp || loadingWeight || loadingBP,
         bodyComposition,
+        bloodPressure,
         latestWeight,
         connect
     };
